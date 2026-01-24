@@ -6,6 +6,8 @@ package com.example.SpringRestAppDemo.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -16,9 +18,10 @@ import jakarta.persistence.Table;
  * @author Marija
  */
 @Entity
-@Table(name = "pokrivenostNastave")
+@Table(name = "pokrivenostnastave")
 public class PokrivenostNastave {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Automatski generisan ID
     @Column(name = "pokrivenostNastaveID")
     private Long pokrivenostNastaveID;
     @Column(name = "brojSatiNastave")

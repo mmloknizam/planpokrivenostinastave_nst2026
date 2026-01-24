@@ -8,6 +8,8 @@ import com.example.SpringRestAppDemo.entity.Nastavnik;
 import com.example.SpringRestAppDemo.entity.OblikNastave;
 import com.example.SpringRestAppDemo.entity.Predmet;
 import com.example.SpringRestAppDemo.entity.SkolskaGodina;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
@@ -16,6 +18,7 @@ import java.io.Serializable;
  */
 public class PokrivenostNastaveDto implements Serializable{
     private Long pokrivenostNastaveID;
+    @Min(value = 0, message = "Broj sati nastave ne može biti negativan")
     private int brojSatiNastave;
     private Predmet predmet;
     private Nastavnik nastavnik;

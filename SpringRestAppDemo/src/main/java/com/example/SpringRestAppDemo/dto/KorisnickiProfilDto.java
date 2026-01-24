@@ -2,50 +2,30 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.example.SpringRestAppDemo.entity;
+package com.example.SpringRestAppDemo.dto;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+
+import com.example.SpringRestAppDemo.entity.Uloga;
+import java.io.Serializable;
 
 /**
  *
- * @author Marija
+ * @author Milena
  */
-@Entity
-@Table(name = "korisnickiprofil")
-public class KorisnickiProfil {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "korisnickiProfilID")
+public class KorisnickiProfilDto implements Serializable{
     private Long korisnickiProfilID;
-    @Column(name = "email")
     private String email;
-    @Column(name = "lozinka")
     private String lozinka;
-    @ManyToOne
-    @JoinColumn(name = "ulogaID")
     private Uloga uloga;
 
-    public KorisnickiProfil() {
+    public KorisnickiProfilDto() {
     }
 
-    public KorisnickiProfil(Long korisnickiProfilID, String email, String lozinka, Uloga uloga) {
+    public KorisnickiProfilDto(Long korisnickiProfilID, String email, String lozinka, Uloga uloga) {
         this.korisnickiProfilID = korisnickiProfilID;
         this.email = email;
         this.lozinka = lozinka;
         this.uloga = uloga;
-    }
-
-
-    @Override
-    public String toString() {
-        return email;
     }
 
     public Long getKorisnickiProfilID() {
@@ -79,7 +59,4 @@ public class KorisnickiProfil {
     public void setUloga(Uloga uloga) {
         this.uloga = uloga;
     }
-    
-    
-
 }

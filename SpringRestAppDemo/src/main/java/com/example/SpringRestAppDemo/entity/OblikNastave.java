@@ -14,7 +14,7 @@ import jakarta.persistence.Table;
  * @author Marija
  */
 @Entity
-@Table(name = "oblikNastave")
+@Table(name = "obliknastave")
 public class OblikNastave {
     @Id
     @Column(name = "oblikNastaveID")

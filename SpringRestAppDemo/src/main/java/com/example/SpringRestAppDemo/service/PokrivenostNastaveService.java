@@ -4,15 +4,17 @@
  */
 package com.example.SpringRestAppDemo.service;
 
+import com.example.SpringRestAppDemo.dto.PlanPokrivenostiNastaveDto;
 import com.example.SpringRestAppDemo.dto.PokrivenostNastaveDto;
+import java.util.List;
 
 /**
  *
  * @author Milena
  */
 public interface PokrivenostNastaveService {
-    //List<CityDto> findAll();
-    //CityDto findByZipcode(Long zipcode) throws Exception;
+    List<PokrivenostNastaveDto> findAll();
+    //PokrivenostNastaveDto findById(Long predmetID) throws Exception;
     PokrivenostNastaveDto save(PokrivenostNastaveDto pokrivenostNastaveDto) throws Exception;
-    
+    List<PlanPokrivenostiNastaveDto> getPlanZaGodinu(Long skolskaGodinaID);
 }

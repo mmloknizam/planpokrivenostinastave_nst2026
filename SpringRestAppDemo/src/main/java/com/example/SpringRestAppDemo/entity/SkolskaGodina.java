@@ -14,7 +14,7 @@ import jakarta.persistence.Table;
  * @author Marija
  */
 @Entity
-@Table(name = "skolskaGodina")
+@Table(name = "skolskagodina")
 public class SkolskaGodina {
     @Id
     @Column(name = "skolskaGodinaID")
