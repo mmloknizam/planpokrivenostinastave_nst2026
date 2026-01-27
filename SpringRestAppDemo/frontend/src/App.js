@@ -3,7 +3,7 @@ import axios from "axios";
 import LoginForm from "./LoginForm";
 import AdminForm from "./AdminForm";
 import PlanPokrivenostiNastaveForm from "./PlanPokrivenostiNastaveForm";
-import RegisterForm from "./RegisterForm"; // ✅ ISPRAVLJENO
+import RegisterForm from "./RegisterForm";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -13,15 +13,24 @@ function App() {
   const [skolskeGodine, setSkolskeGodine] = useState([]);
   const [selectedGodinaID, setSelectedGodinaID] = useState("");
 
-  // LOGOUT
   const handleLogout = () => {
     localStorage.removeItem("token");
     setUser(null);
     setPlanovi([]);
     setSelectedGodinaID("");
   };
+  
+  const obrisiRed= async(ids) => {
+      try{
+          await axios.delete("/api/pokrivenostnastave", {data: ids});
+          const res=await axios.get(`/api/pokrivenostnastave/plan/${selectedGodinaID}`);
+          setPlanovi(res.data);
+      } catch(err){
+          console.error(err);
+          alert("Greška pri brisanju reda!");
+      }
+  };
 
-  // Učitavanje školskih godina
   useEffect(() => {
     axios
       .get("/api/skolskagodina")
@@ -29,7 +38,7 @@ function App() {
       .catch((err) => console.error(err));
   }, []);
 
-  // Učitavanje planova
+
   useEffect(() => {
     if (user && selectedGodinaID) {
       axios
@@ -41,10 +50,9 @@ function App() {
 
   return (
     <div style={{ padding: "20px" }}>
-      {/* LOGIN / REGISTER */}
       {!user ? (
         showRegister ? (
-          <RegisterForm onBackToLogin={() => setShowRegister(false)} /> // ✅ ISPRAVLJENO
+          <RegisterForm onBackToLogin={() => setShowRegister(false)} />
         ) : (
           <LoginForm
             setUser={setUser}
@@ -53,7 +61,6 @@ function App() {
         )
       ) : (
         <>
-          {/* HEADER */}
           <div style={{ marginBottom: "20px" }}>
             <span style={{ marginRight: "15px" }}>
               <b>{user.email}</b> | Uloga: <b>{user.uloga}</b>
@@ -61,7 +68,6 @@ function App() {
             <button onClick={handleLogout}>Odjavi se</button>
           </div>
 
-          {/* ADMIN / KORISNIK */}
           {user.uloga === "Administrator" ? (
             <AdminForm
               planovi={planovi}
@@ -70,6 +76,8 @@ function App() {
               onGodinaChange={(e) =>
                 setSelectedGodinaID(e.target.value)
               }
+              obrisiRed={obrisiRed}
+              setPlanovi={setPlanovi}
             />
           ) : (
             <PlanPokrivenostiNastaveForm
@@ -79,6 +87,8 @@ function App() {
               onGodinaChange={(e) =>
                 setSelectedGodinaID(e.target.value)
               }
+              obrisiRed={obrisiRed}
+              isAdmin={false}
             />
           )}
         </>

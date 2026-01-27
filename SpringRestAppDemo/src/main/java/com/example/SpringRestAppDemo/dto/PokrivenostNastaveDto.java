@@ -9,7 +9,6 @@ import com.example.SpringRestAppDemo.entity.OblikNastave;
 import com.example.SpringRestAppDemo.entity.Predmet;
 import com.example.SpringRestAppDemo.entity.SkolskaGodina;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**

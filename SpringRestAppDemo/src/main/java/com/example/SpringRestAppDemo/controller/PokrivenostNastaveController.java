@@ -12,6 +12,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,6 +50,26 @@ public class PokrivenostNastaveController {
     @GetMapping("/plan/{skolskaGodinaID}")
     public List<PlanPokrivenostiNastaveDto> getPlan(@PathVariable Long skolskaGodinaID) {
         return pokrivenostNastaveService.getPlanZaGodinu(skolskaGodinaID);
+    }
+    
+    @DeleteMapping
+    public ResponseEntity<Void> deleteBatch(@RequestBody List<Long> ids){
+        pokrivenostNastaveService.deleteBatch(ids);
+        return ResponseEntity.noContent().build();
+    }
+    
+    @GetMapping("/detalji/{predmetID}/{skolskaGodinaID}")
+    public List<PokrivenostNastaveDto> getDetalji(
+            @PathVariable Long predmetID,
+            @PathVariable Long skolskaGodinaID
+    ) {
+        return pokrivenostNastaveService.findByPredmetAndGodina(predmetID, skolskaGodinaID);
+    }
+ 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOne(@PathVariable Long id) {
+        pokrivenostNastaveService.deleteOne(id);
+        return ResponseEntity.noContent().build();
     }
     
     @ExceptionHandler(value = Exception.class)

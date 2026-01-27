@@ -5,6 +5,7 @@
 package com.example.SpringRestAppDemo.dto;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  *
@@ -18,11 +19,12 @@ public class PlanPokrivenostiNastaveDto implements Serializable{
     private String laboratorijskeVezbe;
     private String godina;
     private int brojSatiNastave;
+    private List<Long> pokrivenostNastaveIDs;
 
     public PlanPokrivenostiNastaveDto() {
     }
 
-    public PlanPokrivenostiNastaveDto(Long predmetID, String nazivPredmeta, String predavanja, String vezbe, String laboratorijskeVezbe, String godina, int brojSatiNastave) {
+    public PlanPokrivenostiNastaveDto(Long predmetID, String nazivPredmeta, String predavanja, String vezbe, String laboratorijskeVezbe, String godina, int brojSatiNastave, List<Long> pokrivenostNastaveIDs) {
         this.predmetID = predmetID;
         this.nazivPredmeta = nazivPredmeta;
         this.predavanja = predavanja;
@@ -30,6 +32,7 @@ public class PlanPokrivenostiNastaveDto implements Serializable{
         this.laboratorijskeVezbe = laboratorijskeVezbe;
         this.godina = godina;
         this.brojSatiNastave = brojSatiNastave;
+        this.pokrivenostNastaveIDs = pokrivenostNastaveIDs;
     }
 
     public Long getPredmetID() {
@@ -88,5 +91,11 @@ public class PlanPokrivenostiNastaveDto implements Serializable{
         this.brojSatiNastave = brojSatiNastave;
     }
 
-    
+    public List<Long> getPokrivenostNastaveIDs() {
+        return pokrivenostNastaveIDs;
+    }
+
+    public void setPokrivenostNastaveIDs(List<Long> pokrivenostNastaveIDs) {
+        this.pokrivenostNastaveIDs = pokrivenostNastaveIDs;
+    }
 }

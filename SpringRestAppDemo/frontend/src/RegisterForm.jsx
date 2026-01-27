@@ -12,7 +12,6 @@ function RegisterForm({ onBackToLogin }) {
     const [poruka, setPoruka] = useState("");
     const [greska, setGreska] = useState("");
 
-    // Učitavanje uloga
     useEffect(() => {
         axios
             .get("/api/uloga")
@@ -178,7 +177,6 @@ function RegisterForm({ onBackToLogin }) {
                 </button>
             </form>
 
-            {/* Povratak na login */}
             <button
                 onClick={onBackToLogin}
                 style={{

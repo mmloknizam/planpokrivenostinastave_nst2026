@@ -16,7 +16,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
-
 /**
  *
  * @author Marija
@@ -52,15 +51,12 @@ public class PokrivenostNastaveServiceImpl implements PokrivenostNastaveService{
     @Override
     public List<PlanPokrivenostiNastaveDto> getPlanZaGodinu(Long skolskaGodinaID) {
 
-        // 1. Učitaj sve zapise za godinu
         List<PokrivenostNastave> lista =
                 pokrivenostNastaveRepository
                         .findAllBySkolskaGodina_SkolskaGodinaID(skolskaGodinaID);
 
-        // 2. Mapa rezultat po predmetu
         Map<Long, PlanPokrivenostiNastaveDto> rezultat = new LinkedHashMap<>();
 
-        // 3. Mapa sati: predmet -> oblik -> nastavnik -> broj sati
         Map<Long, Map<String, Map<Long, Integer>>> satiMap = new HashMap<>();
 
         for (PokrivenostNastave pn : lista) {
@@ -69,26 +65,30 @@ public class PokrivenostNastaveServiceImpl implements PokrivenostNastaveService{
             Long nastavnikID = pn.getNastavnik().getNastavnikID();
             String oblik = pn.getOblikNastave().getTip();
 
-            // kreiraj dto ako ne postoji
-            rezultat.putIfAbsent(
+            rezultat.computeIfAbsent(
                     predmetID,
-                    new PlanPokrivenostiNastaveDto(
-                            predmetID,
-                            pn.getPredmet().getNaziv(),
-                            null, null, null,
-                            pn.getSkolskaGodina().getGodina(),
-                            0
-                    )
+                    id -> {
+                        PlanPokrivenostiNastaveDto dto=
+                        new PlanPokrivenostiNastaveDto(
+                                predmetID,
+                                pn.getPredmet().getNaziv(),
+                                null, null, null,
+                                pn.getSkolskaGodina().getGodina(),
+                                0, null
+                        );
+                        dto.setPokrivenostNastaveIDs(new ArrayList<>());
+                        return dto;
+                    }
             );
+            
+            rezultat.get(predmetID).getPokrivenostNastaveIDs().add(pn.getPokrivenostNastaveID());
 
-            // inicijalizacija mapa i dodavanje sati po nastavniku samo jednom
             satiMap
                     .computeIfAbsent(predmetID, k -> new HashMap<>())
                     .computeIfAbsent(oblik, k -> new LinkedHashMap<>())
-                    .putIfAbsent(nastavnikID, pn.getBrojSatiNastave()); // NE SABIRAJ
+                    .putIfAbsent(nastavnikID, pn.getBrojSatiNastave());
         }
 
-        // 4. Popunjavanje stringova za predavanja/vezbe/lab i ukupnog broja sati
         for (Long predmetID : satiMap.keySet()) {
 
             PlanPokrivenostiNastaveDto dto = rezultat.get(predmetID);
@@ -99,10 +99,8 @@ public class PokrivenostNastaveServiceImpl implements PokrivenostNastaveService{
                 String oblik = oblikEntry.getKey();
                 Map<Long, Integer> nastavnici = oblikEntry.getValue();
 
-                // string za frontend
                 String vrednost = nastavnici.entrySet().stream()
                         .map(e -> {
-                            // pronađi nastavnika u originalnoj listi da uzmeš ime/prezime
                             PokrivenostNastave pn = lista.stream()
                                     .filter(x ->
                                             x.getPredmet().getPredmetID().equals(predmetID)
@@ -120,7 +118,6 @@ public class PokrivenostNastaveServiceImpl implements PokrivenostNastaveService{
                         .reduce((a, b) -> a + ", " + b)
                         .orElse(null);
 
-                // postavljanje stringa u dto
                 switch (oblik) {
                     case "Predavanja":
                         dto.setPredavanja(vrednost);
@@ -133,7 +130,6 @@ public class PokrivenostNastaveServiceImpl implements PokrivenostNastaveService{
                         break;
                 }
 
-                // sabiranje ukupnih sati po predmetu
                 ukupnoSati += nastavnici.values().stream().mapToInt(Integer::intValue).sum();
             }
 
@@ -143,6 +139,28 @@ public class PokrivenostNastaveServiceImpl implements PokrivenostNastaveService{
         return new ArrayList<>(rezultat.values());
     }
 
+    @Override
+    public void deleteBatch(List<Long> ids) {
+        pokrivenostNastaveRepository.deleteAllById(ids);
+    }
+
+    @Override
+    public List<PokrivenostNastaveDto> findByPredmetAndGodina(
+            Long predmetID,
+            Long skolskaGodinaID
+    ) {
+        return pokrivenostNastaveRepository
+                .findByPredmet_PredmetIDAndSkolskaGodina_SkolskaGodinaID(
+                        predmetID, skolskaGodinaID
+                )
+                .stream()
+                .map(pokrivenostNastaveDtoEntityMapper::toDto)
+                .toList();
+    }
+    @Override
+    public void deleteOne(Long id) {
+        pokrivenostNastaveRepository.deleteById(id);
+    }
 
 
 }

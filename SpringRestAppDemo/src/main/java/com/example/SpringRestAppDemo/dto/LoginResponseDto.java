@@ -11,7 +11,7 @@ import java.io.Serializable;
  * @author Milena
  */
 public class LoginResponseDto implements Serializable{
-    private String token; // JWT token
+    private String token;
     private String email;
     private String uloga;
 

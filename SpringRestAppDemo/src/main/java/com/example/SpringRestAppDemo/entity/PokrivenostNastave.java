@@ -21,7 +21,7 @@ import jakarta.persistence.Table;
 @Table(name = "pokrivenostnastave")
 public class PokrivenostNastave {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Automatski generisan ID
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "pokrivenostNastaveID")
     private Long pokrivenostNastaveID;
     @Column(name = "brojSatiNastave")

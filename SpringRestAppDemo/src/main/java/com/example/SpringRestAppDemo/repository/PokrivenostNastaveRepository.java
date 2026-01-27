@@ -17,5 +17,7 @@ import org.springframework.stereotype.Repository;
 public interface PokrivenostNastaveRepository extends JpaRepository<PokrivenostNastave, Long>{
 
     public List<PokrivenostNastave> findAllBySkolskaGodina_SkolskaGodinaID(Long skolskaGodinaID);
+
+    public List<PokrivenostNastave> findByPredmet_PredmetIDAndSkolskaGodina_SkolskaGodinaID(Long predmetID,Long skolskaGodinaID);
     
 }

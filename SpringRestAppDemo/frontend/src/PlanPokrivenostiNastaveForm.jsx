@@ -4,13 +4,15 @@ const PlanPokrivenostiNastaveForm = ({
   planovi = [],
   skolskeGodine = [],
   selectedGodinaID,
-  onGodinaChange
+  onGodinaChange,
+  obrisiRed,
+  isAdmin,
+  onDetalji
 }) => {
   return (
     <div>
       <h3>Plan pokrivenosti nastave</h3>
 
-      {/* IZBOR GODINE */}
       <label>Školska godina: </label>
       <select value={selectedGodinaID || ""} onChange={onGodinaChange}>
         <option value="">-- Izaberi godinu --</option>
@@ -31,24 +33,38 @@ const PlanPokrivenostiNastaveForm = ({
             <th>Predavanja</th>
             <th>Vežbe</th>
             <th>Laboratorijske vežbe</th>
+            {isAdmin && <th>Akcije</th>}
           </tr>
         </thead>
         <tbody>
-          {planovi.length > 0 ? (
-            planovi.map(p => (
-              <tr key={p.predmetID}>
-                <td>{p.predmetID}</td>
-                <td>{p.nazivPredmeta}</td>
-                <td>{p.predavanja || "-"}</td>
-                <td>{p.vezbe || "-"}</td>
-                <td>{p.laboratorijskeVezbe || "-"}</td>
-              </tr>
-            ))
-          ) : (
+          {planovi.length > 0 ? planovi.map(p => (
+            <tr key={p.predmetID}>
+              <td>{p.predmetID}</td>
+              <td>{p.nazivPredmeta}</td>
+              <td>{p.predavanja || "-"}</td>
+              <td>{p.vezbe || "-"}</td>
+              <td>{p.laboratorijskeVezbe || "-"}</td>
+              {isAdmin && (
+                <td>
+                  <button
+                    onClick={() => {
+                      if(window.confirm("Da li ste sigurni?")) obrisiRed(p.pokrivenostNastaveIDs);
+                    }}
+                  >
+                    Obriši
+                  </button>
+                  <button
+                    style={{ marginLeft: "10px" }}
+                    onClick={() => onDetalji(p.predmetID)}
+                  >
+                    Detalji
+                  </button>
+                </td>
+              )}
+            </tr>
+          )) : (
             <tr>
-              <td colSpan="5" align="center">
-                Nema podataka za izabranu godinu
-              </td>
+              <td colSpan="6" align="center">Nema podataka za izabranu godinu</td>
             </tr>
           )}
         </tbody>
@@ -58,3 +74,4 @@ const PlanPokrivenostiNastaveForm = ({
 };
 
 export default PlanPokrivenostiNastaveForm;
+

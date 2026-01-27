@@ -32,7 +32,6 @@ public class KorisnickiProfilServiceImpl implements KorisnickiProfilService{
 
     @Override
     public LoginResponseDto login(LoginRequestDto request) throws Exception {
-            // Pronađi korisnika po emailu
     Optional<KorisnickiProfil> korisnikOpt = 
             korisnickiProfilRepository.findByEmail(request.getEmail());
 
@@ -42,14 +41,12 @@ public class KorisnickiProfilServiceImpl implements KorisnickiProfilService{
 
     KorisnickiProfil korisnik = korisnikOpt.get();
 
-    // Provera lozinke
     if (!korisnik.getLozinka().equals(request.getLozinka())) {
         throw new Exception("Pogresna lozinka");
     }
 
-    // Vrati DTO sa tokenom, email-om i ulogom
     return new LoginResponseDto(
-            "dummy-token",             // kasnije možeš ubaciti JWT
+            "dummy-token",
             korisnik.getEmail(),
             korisnik.getUloga().toString()
     );
@@ -58,7 +55,6 @@ public class KorisnickiProfilServiceImpl implements KorisnickiProfilService{
     @Override
     public RegisterResponseDto register(RegisterRequestDto request) throws Exception {
         
-        // ✔ email ne sme da postoji
         if (korisnickiProfilRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new Exception("Email već postoji!");
         }
@@ -68,13 +64,10 @@ public class KorisnickiProfilServiceImpl implements KorisnickiProfilService{
             throw new Exception(passwordError);
         }
 
-        // ✔ uloga mora postojati
         Uloga uloga = ulogaRepository.findById(request.getUlogaID())
                 .orElseThrow(() -> new Exception("Uloga ne postoji!"));
 
-        // ✔ kreiranje korisnika
         KorisnickiProfil korisnik = new KorisnickiProfil();
-        //  korisnik.setKorisnickiProfilID(null); // AUTO_INCREMENT ako imas u bazi
         korisnik.setEmail(request.getEmail());
         korisnik.setLozinka(request.getLozinka());
         korisnik.setUloga(uloga);
@@ -97,6 +90,6 @@ public class KorisnickiProfilServiceImpl implements KorisnickiProfilService{
         if (!lozinka.matches(".*[@#$%^&+=!?.*].*")) {
             return "Lozinka mora imati bar jedan specijalan karakter (@#$%^&+=!?.*)";
         }
-        return null; // sve je ok
+        return null;
     }
 }
