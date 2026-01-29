@@ -35,12 +35,6 @@ public class PokrivenostNastaveController {
     public PokrivenostNastaveController(PokrivenostNastaveService pokrivenostNastaveService) {
         this.pokrivenostNastaveService = pokrivenostNastaveService;
     }
-
-    @PostMapping()
-    public ResponseEntity<PokrivenostNastaveDto> save(@Valid @RequestBody PokrivenostNastaveDto pokrivenostNastaveDto) throws Exception{
-        return new ResponseEntity<>(pokrivenostNastaveService.save(pokrivenostNastaveDto), HttpStatus.OK);
-    }
-    
     
     @GetMapping()
     public List<PokrivenostNastaveDto> findAll() throws Exception {
@@ -70,6 +64,18 @@ public class PokrivenostNastaveController {
     public ResponseEntity<Void> deleteOne(@PathVariable Long id) {
         pokrivenostNastaveService.deleteOne(id);
         return ResponseEntity.noContent().build();
+    }
+    
+    @PostMapping("/plan")
+    public ResponseEntity<PokrivenostNastaveDto> savePlan(
+            @RequestBody PokrivenostNastaveDto dto) throws Exception {
+        return ResponseEntity.ok(pokrivenostNastaveService.savePlan(dto));
+    }
+ 
+    @PostMapping("/detalji")
+    public ResponseEntity<PokrivenostNastaveDto> saveDetalji(
+            @RequestBody PokrivenostNastaveDto dto) {
+        return ResponseEntity.ok(pokrivenostNastaveService.saveDetalji(dto));
     }
     
     @ExceptionHandler(value = Exception.class)

@@ -14,9 +14,11 @@ import java.util.List;
  */
 public interface PokrivenostNastaveService {
     List<PokrivenostNastaveDto> findAll();
-    PokrivenostNastaveDto save(PokrivenostNastaveDto pokrivenostNastaveDto) throws Exception;
+    //PokrivenostNastaveDto save(PokrivenostNastaveDto pokrivenostNastaveDto) throws Exception;
     List<PlanPokrivenostiNastaveDto> getPlanZaGodinu(Long skolskaGodinaID);
     void deleteBatch(List<Long> ids);
     List<PokrivenostNastaveDto> findByPredmetAndGodina(Long predmetID, Long skolskaGodinaID);
     void deleteOne(Long id);
+    PokrivenostNastaveDto savePlan(PokrivenostNastaveDto dto) throws Exception;
+    PokrivenostNastaveDto saveDetalji(PokrivenostNastaveDto dto);
 }

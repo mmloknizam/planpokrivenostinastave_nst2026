@@ -13,13 +13,25 @@ const DetaljiPokrivenostiModal = ({ detalji, setDetalji, onClose, onSave }) => {
 
   if (!detalji) return null;
 
+  const sumByOblik = (tip) =>
+    detalji
+      .filter(d => d.oblikNastave.tip === tip)
+      .reduce((sum, d) => sum + (d.brojSatiNastave || 0), 0);
+
+  const LIMITI = {
+    "Predavanja": 60,
+    "Vezbe": 60,
+    "Laboratorijske vezbe": 30
+  };
+
   const handleChangeSati = (id, value) => {
     setDetalji(detalji.map(d =>
       d.pokrivenostNastaveID === id
-        ? { ...d, brojSatiNastave: parseInt(value) }
+        ? { ...d, brojSatiNastave: parseInt(value) || 0 }
         : d
     ));
   };
+
 
   const handleChangeNastavnik = (id, noviNastavnik) => {
     setDetalji(detalji.map(d =>
@@ -31,12 +43,15 @@ const DetaljiPokrivenostiModal = ({ detalji, setDetalji, onClose, onSave }) => {
 
   const sacuvaj = async (row) => {
     try {
-      await axios.post("/api/pokrivenostnastave", row);
+     await axios.post("/api/pokrivenostnastave/detalji", row);
+
       alert("Izmene sačuvane!");
       onSave?.();
     } catch (err) {
-      console.error(err);
-      alert("Greška pri čuvanju!");
+      const msg =
+        err.response?.data ||
+        "Došlo je do greške pri čuvanju.";
+      alert(msg);
     }
   };
 
@@ -56,6 +71,15 @@ const DetaljiPokrivenostiModal = ({ detalji, setDetalji, onClose, onSave }) => {
     <div style={overlayStyle}>
       <div style={modalStyle}>
         <h3>Detalji pokrivenosti</h3>
+        
+        <div style={{ marginBottom: "12px" }}>
+          <b>Predavanja:</b> {sumByOblik("Predavanja")} / 60h <br />
+          <b>Vežbe:</b> {sumByOblik("Vezbe")} / 60h <br />
+          <b>Laboratorijske vežbe:</b> {sumByOblik("Laboratorijske vezbe")} / 30h
+        </div>
+        
+        
+        
         <table border="1" cellPadding="5" width="100%">
           <thead>
             <tr>

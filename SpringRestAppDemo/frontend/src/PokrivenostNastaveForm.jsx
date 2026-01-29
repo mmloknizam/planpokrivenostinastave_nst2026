@@ -21,11 +21,36 @@ const PokrivenostNastaveForm = ({ onCancel, onSuccess }) => {
     axios.get("/api/skolskagodina").then(res => setSkolskeGodine(res.data));
     axios.get("/api/obliknastave").then(res => setObliciNastave(res.data));
   }, []);
+  
+    const LIMITI = {
+      "Predavanja": 60,
+      "Vezbe": 60,
+      "Laboratorijske vezbe": 30
+    };
+    const izabraniOblik = obliciNastave.find(
+      o => o.oblikNastaveID === parseInt(formData.oblikNastaveID)
+    );
+
+    const maxSati = izabraniOblik
+      ? LIMITI[izabraniOblik.tip]
+      : null;
+
 
   const handleChange = e => {
-    const { name, value } = e.target;
-    if (name === "brojSatiNastave" && Number(value) < 0) return;
-    setFormData({ ...formData, [name]: value });
+  const { name, value } = e.target;
+
+  if (name === "brojSatiNastave") {
+    const broj = Number(value);
+
+    if (broj < 0) return;
+
+    if (maxSati !== null && broj > maxSati) {
+      alert(`Maksimalan broj sati za ${izabraniOblik.tip} je ${maxSati}`);
+      return;
+    }
+  }
+
+  setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async e => {
@@ -40,7 +65,7 @@ const PokrivenostNastaveForm = ({ onCancel, onSuccess }) => {
     };
 
     try {
-      await axios.post("/api/pokrivenostnastave", payload);
+await axios.post("/api/pokrivenostnastave/plan", payload);
 
       alert("Plan nastave je uspešno sačuvan.");
 
@@ -104,7 +129,8 @@ const PokrivenostNastaveForm = ({ onCancel, onSuccess }) => {
         <br /><br />
 
         <label>Broj sati nastave:</label>
-        <input type="number" name="brojSatiNastave" value={formData.brojSatiNastave} onChange={handleChange} min="0" />
+        <input type="number" name="brojSatiNastave" value={formData.brojSatiNastave} onChange={handleChange} min="0" max={maxSati || undefined} />
+        
         <br /><br />
 
         <button type="submit">Sačuvaj</button>{" "}

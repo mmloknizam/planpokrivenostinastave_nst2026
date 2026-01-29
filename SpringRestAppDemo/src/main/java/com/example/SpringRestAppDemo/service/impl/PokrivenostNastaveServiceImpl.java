@@ -40,13 +40,6 @@ public class PokrivenostNastaveServiceImpl implements PokrivenostNastaveService{
         }
         return planDto;
     }
-    
-    @Override
-    public PokrivenostNastaveDto save(PokrivenostNastaveDto pokrivenostNastaveDto) throws Exception {
-       PokrivenostNastave pokrivenostNastave=pokrivenostNastaveDtoEntityMapper.toEntity(pokrivenostNastaveDto);
-       pokrivenostNastave=pokrivenostNastaveRepository.save(pokrivenostNastave);
-       return pokrivenostNastaveDtoEntityMapper.toDto(pokrivenostNastave);
-    }
 
     @Override
     public List<PlanPokrivenostiNastaveDto> getPlanZaGodinu(Long skolskaGodinaID) {
@@ -160,6 +153,88 @@ public class PokrivenostNastaveServiceImpl implements PokrivenostNastaveService{
     @Override
     public void deleteOne(Long id) {
         pokrivenostNastaveRepository.deleteById(id);
+    }
+
+  @Override
+    public PokrivenostNastaveDto saveDetalji(PokrivenostNastaveDto dto) {
+ 
+        if (dto.getOblikNastave() == null || dto.getOblikNastave().getTip() == null) {
+            throw new RuntimeException("Oblik nastave mora biti zadat");
+        }
+ 
+        int maxSati = switch (dto.getOblikNastave().getTip()) {
+            case "Predavanja", "Vezbe" ->
+                60;
+            case "Laboratorijske vezbe" ->
+                30;
+            default ->
+                throw new RuntimeException("Nepoznat oblik nastave");
+        };
+ 
+        int trenutno = pokrivenostNastaveRepository.sumSati(
+                dto.getPredmet().getPredmetID(),
+                dto.getSkolskaGodina().getSkolskaGodinaID(),
+                dto.getOblikNastave().getOblikNastaveID()
+        );
+ 
+        int stariSati = 0;
+        if (dto.getPokrivenostNastaveID() != null) {
+            PokrivenostNastave postojeci
+                    = pokrivenostNastaveRepository
+                            .findById(dto.getPokrivenostNastaveID())
+                            .orElse(null);
+ 
+            if (postojeci != null) {
+                stariSati = postojeci.getBrojSatiNastave();
+            }
+        }
+ 
+        if (trenutno - stariSati + dto.getBrojSatiNastave() > maxSati) {
+            throw new RuntimeException(
+                    "Prekoračen maksimalan broj sati za "
+                    + dto.getOblikNastave().getTip()
+                    + ". Maksimum je " + maxSati + "h."
+            );
+        }
+ 
+        return pokrivenostNastaveDtoEntityMapper.toDto(
+                pokrivenostNastaveRepository.save(
+                        pokrivenostNastaveDtoEntityMapper.toEntity(dto)
+                )
+        );
+    }
+ 
+    @Override
+    public PokrivenostNastaveDto savePlan(PokrivenostNastaveDto dto) {
+Long oblikId = dto.getOblikNastave().getOblikNastaveID();
+ 
+        int maxSati = switch (oblikId.intValue()) {
+            case 1, 2 ->
+                60;
+            case 3 ->
+                30;
+            default ->
+                throw new RuntimeException("Nepoznat oblik nastave");
+        };
+ 
+        int trenutno = pokrivenostNastaveRepository.sumSati(
+                dto.getPredmet().getPredmetID(),
+                dto.getSkolskaGodina().getSkolskaGodinaID(),
+                oblikId
+        );
+ 
+        if (trenutno + dto.getBrojSatiNastave() > maxSati) {
+            throw new RuntimeException(
+                    "Za izabrani oblik nastave već postoji "
+                    + trenutno + "h. Maksimum je " + maxSati + "h."
+            );
+        }
+ 
+        return pokrivenostNastaveDtoEntityMapper.toDto(
+                pokrivenostNastaveRepository.save(
+                        pokrivenostNastaveDtoEntityMapper.toEntity(dto)
+                )
+        );
     }
 
 
