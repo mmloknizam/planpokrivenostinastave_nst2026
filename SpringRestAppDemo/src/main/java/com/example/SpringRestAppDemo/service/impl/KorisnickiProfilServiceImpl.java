@@ -10,11 +10,15 @@ import com.example.SpringRestAppDemo.dto.RegisterRequestDto;
 import com.example.SpringRestAppDemo.dto.RegisterResponseDto;
 import com.example.SpringRestAppDemo.entity.KorisnickiProfil;
 import com.example.SpringRestAppDemo.entity.Uloga;
+import com.example.SpringRestAppDemo.entity.Verifikacija;
 import com.example.SpringRestAppDemo.repository.KorisnickiProfilRepository;
 import com.example.SpringRestAppDemo.repository.UlogaRepository;
+import com.example.SpringRestAppDemo.repository.VerifikacijaRepository;
 import com.example.SpringRestAppDemo.service.KorisnickiProfilService;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import java.util.UUID;
 
 /**
  *
@@ -24,12 +28,14 @@ import org.springframework.stereotype.Service;
 public class KorisnickiProfilServiceImpl implements KorisnickiProfilService{
     private KorisnickiProfilRepository korisnickiProfilRepository;
     private UlogaRepository ulogaRepository;
+    private VerifikacijaRepository verifikacijaRepository;
 
-    public KorisnickiProfilServiceImpl(KorisnickiProfilRepository korisnickiProfilRepository, UlogaRepository ulogaRepository) {
+    public KorisnickiProfilServiceImpl(KorisnickiProfilRepository korisnickiProfilRepository, UlogaRepository ulogaRepository, VerifikacijaRepository verifikacijaRepository) {
         this.korisnickiProfilRepository = korisnickiProfilRepository;
         this.ulogaRepository = ulogaRepository;
+        this.verifikacijaRepository = verifikacijaRepository;
     }
-
+ 
     @Override
     public LoginResponseDto login(LoginRequestDto request) throws Exception {
     Optional<KorisnickiProfil> korisnikOpt = 
@@ -54,11 +60,12 @@ public class KorisnickiProfilServiceImpl implements KorisnickiProfilService{
 
     @Override
     public RegisterResponseDto register(RegisterRequestDto request) throws Exception {
+        validateEmail(request.getEmail());
         
         if (korisnickiProfilRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new Exception("Email već postoji!");
         }
-
+        
         String passwordError = validatePassword(request.getLozinka());
         if (passwordError != null) {
             throw new Exception(passwordError);
@@ -71,10 +78,29 @@ public class KorisnickiProfilServiceImpl implements KorisnickiProfilService{
         korisnik.setEmail(request.getEmail());
         korisnik.setLozinka(request.getLozinka());
         korisnik.setUloga(uloga);
+        korisnik.setEnabled(false);
 
         korisnickiProfilRepository.save(korisnik);
 
-        return new RegisterResponseDto("Uspešno ste registrovali korisnika!");
+        String kod = UUID.randomUUID().toString();
+
+        Verifikacija verifikacija = new Verifikacija();
+        verifikacija.setEmail(request.getEmail());
+        verifikacija.setKod(kod);
+        verifikacija.setVreme(LocalDateTime.now());
+        verifikacijaRepository.save(verifikacija);
+
+        System.out.println("Verifikacioni kod za " + request.getEmail() + ": " + kod);
+
+        return new RegisterResponseDto(
+                "Korisnik registrovan! Za testiranje, verifikacioni kod je ispisan u logu. Kod važi 10 minuta."
+        );
+    }
+
+        private void validateEmail(String email) throws Exception {
+        if (email == null || !email.endsWith("@fon.bg.ac.rs")) {
+            throw new Exception("Email mora biti u formatu @fon.bg.ac.rs");
+        }
     }
 
         private String validatePassword(String lozinka) {
@@ -92,4 +118,59 @@ public class KorisnickiProfilServiceImpl implements KorisnickiProfilService{
         }
         return null;
     }
+
+    @Override
+    public RegisterResponseDto confirmEmail(String email, String kod) throws Exception {
+
+        // Pronađi verifikaciju po email-u i kodu
+        Optional<Verifikacija> verifikacijaOpt = verifikacijaRepository
+                .findByEmailAndKod(email, kod);
+
+        if (verifikacijaOpt.isEmpty()) {
+            throw new Exception("Nevažeći kod za verifikaciju.");
+        }
+
+        Verifikacija verifikacija = verifikacijaOpt.get();
+
+        if (verifikacija.getVreme().plusMinutes(10).isBefore(LocalDateTime.now())) {
+            throw new Exception("Kod je istekao. Molimo generišite novi kod.");
+        }
+
+        KorisnickiProfil korisnik = korisnickiProfilRepository
+                .findByEmail(email)
+                .orElseThrow(() -> new Exception("Korisnik ne postoji."));
+
+        korisnik.setEnabled(true);
+        korisnickiProfilRepository.save(korisnik);
+
+        verifikacijaRepository.delete(verifikacija);
+
+        return new RegisterResponseDto("Korisnik uspešno aktiviran!");
+    }
+    
+    
+    @Override
+    public RegisterResponseDto resendVerificationCode(String email) throws Exception {
+        Optional<Verifikacija> verifikacijaOpt = verifikacijaRepository.findByEmail(email);
+
+        if (verifikacijaOpt.isEmpty()) {
+            throw new Exception("Ne postoji verifikacija za ovaj email. Molimo registrujte se ponovo.");
+        }
+
+        Verifikacija verifikacija = verifikacijaOpt.get();
+
+        String noviKod = UUID.randomUUID().toString();
+        verifikacija.setKod(noviKod);
+        verifikacija.setVreme(LocalDateTime.now());
+
+        verifikacijaRepository.save(verifikacija);
+
+        System.out.println("Novi verifikacioni kod za " + email + ": " + noviKod);
+
+        return new RegisterResponseDto(
+                "Novi verifikacioni kod je generisan i važi 10 minuta. Kod je ispisan u logu za testiranje."
+        );
+    }
+
+
 }

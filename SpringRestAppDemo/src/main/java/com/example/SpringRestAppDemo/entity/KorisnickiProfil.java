@@ -31,6 +31,8 @@ public class KorisnickiProfil {
     @ManyToOne
     @JoinColumn(name = "ulogaID")
     private Uloga uloga;
+    @Column(name = "enabled")
+    private boolean enabled = false;
 
     public KorisnickiProfil() {
     }
@@ -79,7 +81,12 @@ public class KorisnickiProfil {
     public void setUloga(Uloga uloga) {
         this.uloga = uloga;
     }
-    
-    
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 }

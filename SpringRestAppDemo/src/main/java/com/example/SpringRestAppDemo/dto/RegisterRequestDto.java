@@ -4,13 +4,20 @@
  */
 package com.example.SpringRestAppDemo.dto;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+
 /**
  *
  * @author Milena
  */
 public class RegisterRequestDto {
-
-     private String email;
+    @NotNull
+    @Pattern(
+        regexp = "^[A-Za-z0-9._%+-]+@fon\\.bg\\.ac\\.rs$",
+        message = "Email mora biti u formatu @fon.bg.ac.rs"
+    )
+    private String email;
     private String lozinka;
     private Long ulogaID;
 

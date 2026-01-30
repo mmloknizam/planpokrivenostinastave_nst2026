@@ -4,10 +4,12 @@
  */
 package com.example.SpringRestAppDemo.controller;
 
+import com.example.SpringRestAppDemo.dto.ConfirmEmailRequestDto;
 import com.example.SpringRestAppDemo.dto.LoginRequestDto;
 import com.example.SpringRestAppDemo.dto.LoginResponseDto;
 import com.example.SpringRestAppDemo.dto.RegisterRequestDto;
 import com.example.SpringRestAppDemo.dto.RegisterResponseDto;
+import com.example.SpringRestAppDemo.dto.ResendCodeRequestDto;
 import com.example.SpringRestAppDemo.service.KorisnickiProfilService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +43,17 @@ public class KorisnickiProfilController {
     @PostMapping("/register")
     public ResponseEntity<RegisterResponseDto> register(@RequestBody RegisterRequestDto request) throws Exception {
         return ResponseEntity.ok(korisnickiProfilService.register(request));
-    }   
+    }
+    
+    @PostMapping("/confirm")
+    public ResponseEntity<RegisterResponseDto> confirmEmail(@RequestBody ConfirmEmailRequestDto request) throws Exception {
+        return ResponseEntity.ok(korisnickiProfilService.confirmEmail(request.getEmail(), request.getKod()));
+    }
+    
+    @PostMapping("/resend-code")
+    public ResponseEntity<RegisterResponseDto> resendVerificationCode(@RequestBody ResendCodeRequestDto request) throws Exception {
+        return ResponseEntity.ok(korisnickiProfilService.resendVerificationCode(request.getEmail()));
+    }
     
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<String> handleException(Exception e){

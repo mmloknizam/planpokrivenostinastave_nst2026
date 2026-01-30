@@ -4,18 +4,21 @@
  */
 package com.example.SpringRestAppDemo.dto;
 
+
+import java.io.Serializable;
+
 /**
  *
- * @author Milena
+ * @author Marija
  */
-public class RegisterResponseDto {
-     private String message;
+public class ResendCodeRequestDto implements Serializable{
+    private String email;
 
-    public RegisterResponseDto(String message) {
-        this.message = message;
+    public String getEmail() { 
+        return email;
+    }
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public String getMessage() { 
-        return message; 
-    }
 }
