@@ -16,6 +16,6 @@ import com.example.SpringRestAppDemo.dto.RegisterResponseDto;
 public interface KorisnickiProfilService {
     LoginResponseDto login(LoginRequestDto request) throws Exception;
     RegisterResponseDto register(RegisterRequestDto request) throws Exception;
-    RegisterResponseDto confirmEmail(String email, String kod) throws Exception;
+    RegisterResponseDto confirmEmail(String email, String kod, String lozinka, Long ulogaID) throws Exception;
     RegisterResponseDto resendVerificationCode(String email) throws Exception;
 }

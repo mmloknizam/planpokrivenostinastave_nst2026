@@ -21,19 +21,18 @@ const PokrivenostNastaveForm = ({ onCancel, onSuccess }) => {
     axios.get("/api/skolskagodina").then(res => setSkolskeGodine(res.data));
     axios.get("/api/obliknastave").then(res => setObliciNastave(res.data));
   }, []);
-  
-    const LIMITI = {
-      "Predavanja": 60,
-      "Vezbe": 60,
-      "Laboratorijske vezbe": 30
-    };
-    const izabraniOblik = obliciNastave.find(
-      o => o.oblikNastaveID === parseInt(formData.oblikNastaveID)
-    );
+const LIMITI = {
+  "Predavanja": 60,
+  "Vezbe": 60,
+  "Laboratorijske vezbe": 30
+};
+const izabraniOblik = obliciNastave.find(
+  o => o.oblikNastaveID === parseInt(formData.oblikNastaveID)
+);
 
-    const maxSati = izabraniOblik
-      ? LIMITI[izabraniOblik.tip]
-      : null;
+const maxSati = izabraniOblik
+  ? LIMITI[izabraniOblik.tip]
+  : null;
 
 
   const handleChange = e => {

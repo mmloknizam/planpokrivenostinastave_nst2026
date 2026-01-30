@@ -14,6 +14,8 @@ import java.io.Serializable;
 public class ConfirmEmailRequestDto implements Serializable{
     private String email;
     private String kod;
+    private String lozinka;
+    private Long ulogaID;
 
     public String getEmail() { 
         return email;
@@ -27,5 +29,21 @@ public class ConfirmEmailRequestDto implements Serializable{
     }
     public void setKod(String kod) { 
         this.kod = kod; 
+    }
+
+    public String getLozinka() {
+        return lozinka;
+    }
+
+    public void setLozinka(String lozinka) {
+        this.lozinka = lozinka;
+    }
+
+    public Long getUlogaID() {
+        return ulogaID;
+    }
+
+    public void setUlogaID(Long ulogaID) {
+        this.ulogaID = ulogaID;
     }
 }

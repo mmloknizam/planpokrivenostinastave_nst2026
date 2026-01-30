@@ -14,7 +14,7 @@ const PlanPokrivenostiNastaveForm = ({
       <h3>Plan pokrivenosti nastave</h3>
 
       <label>Školska godina: </label>
-      <select value={selectedGodinaID || ""} onChange={onGodinaChange}>
+      <select className="godina-select" value={selectedGodinaID || ""} onChange={onGodinaChange}>
         <option value="">-- Izaberi godinu --</option>
         {skolskeGodine.map(g => (
           <option key={g.skolskaGodinaID} value={g.skolskaGodinaID}>
@@ -25,7 +25,8 @@ const PlanPokrivenostiNastaveForm = ({
 
       <br /><br />
 
-      <table border="1" cellPadding="8" style={{ width: "100%", borderCollapse: "collapse" }}>
+      <table cellPadding="8" style={{ width: "100%", borderCollapse: "collapse" }}>
+
         <thead>
           <tr>
             <th>ID predmeta</th>
@@ -45,8 +46,9 @@ const PlanPokrivenostiNastaveForm = ({
               <td>{p.vezbe || "-"}</td>
               <td>{p.laboratorijskeVezbe || "-"}</td>
               {isAdmin && (
-                <td>
+                 <td className="actions-cell">
                   <button
+                     className="table-btn"
                     onClick={() => {
                       if(window.confirm("Da li ste sigurni?")) obrisiRed(p.pokrivenostNastaveIDs);
                     }}
@@ -54,7 +56,7 @@ const PlanPokrivenostiNastaveForm = ({
                     Obriši
                   </button>
                   <button
-                    style={{ marginLeft: "10px" }}
+                    className="table-btn"
                     onClick={() => onDetalji(p.predmetID)}
                   >
                     Detalji
@@ -74,4 +76,3 @@ const PlanPokrivenostiNastaveForm = ({
 };
 
 export default PlanPokrivenostiNastaveForm;
-

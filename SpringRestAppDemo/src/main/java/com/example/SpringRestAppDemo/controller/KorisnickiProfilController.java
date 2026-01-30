@@ -47,9 +47,10 @@ public class KorisnickiProfilController {
     
     @PostMapping("/confirm")
     public ResponseEntity<RegisterResponseDto> confirmEmail(@RequestBody ConfirmEmailRequestDto request) throws Exception {
-        return ResponseEntity.ok(korisnickiProfilService.confirmEmail(request.getEmail(), request.getKod()));
+        return ResponseEntity.ok(
+            korisnickiProfilService.confirmEmail(request.getEmail(),request.getKod(),request.getLozinka(),request.getUlogaID()));
     }
-    
+
     @PostMapping("/resend-code")
     public ResponseEntity<RegisterResponseDto> resendVerificationCode(@RequestBody ResendCodeRequestDto request) throws Exception {
         return ResponseEntity.ok(korisnickiProfilService.resendVerificationCode(request.getEmail()));
