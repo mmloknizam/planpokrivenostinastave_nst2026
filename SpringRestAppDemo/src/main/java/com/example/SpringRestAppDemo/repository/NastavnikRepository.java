@@ -5,6 +5,7 @@
 package com.example.SpringRestAppDemo.repository;
 
 import com.example.SpringRestAppDemo.entity.Nastavnik;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,5 +15,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface NastavnikRepository extends JpaRepository<Nastavnik, Long>{
+
     
 }

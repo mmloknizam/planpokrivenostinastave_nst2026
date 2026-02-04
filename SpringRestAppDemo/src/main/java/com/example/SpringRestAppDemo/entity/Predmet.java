@@ -23,16 +23,28 @@ public class Predmet {
     private String naziv;
     @Column(name = "brojEspb")
     private int brojEspb;
+    @Column(name = "fondPredavanja")
+    private int fondPredavanja;
+    @Column(name = "fondVezbi")
+    private int fondVezbi;
+    @Column(name = "fondLabVezbi")
+    private int fondLabVezbi;
+    @Column(name = "aktivan")
+    private boolean aktivan;
 
     public Predmet() {
     }
 
-    public Predmet(Long predmetID, String naziv, int brojEspb) {
+    public Predmet(Long predmetID, String naziv, int brojEspb, int fondPredavanja, int fondVezbi, int fondLabVezbi, boolean aktivan) {
         this.predmetID = predmetID;
         this.naziv = naziv;
         this.brojEspb = brojEspb;
+        this.fondPredavanja = fondPredavanja;
+        this.fondVezbi = fondVezbi;
+        this.fondLabVezbi = fondLabVezbi;
+        this.aktivan = aktivan;
     }
-
+    
     public Long getPredmetID() {
         return predmetID;
     }
@@ -57,11 +69,42 @@ public class Predmet {
         this.brojEspb = brojEspb;
     }
 
+    
     @Override
     public String toString() {
-        return "Predmet{" + "naziv=" + naziv + '}';
+        return "Predmet{" + "predmetID=" + predmetID + ", naziv=" + naziv + ", brojEspb=" + brojEspb + ", fondPredavanja=" + fondPredavanja + ", fondVezbi=" + fondVezbi + ", fondLabVezbi=" + fondLabVezbi + ", aktivan=" + aktivan + '}';
     }
-    
-    
-    
+
+    public int getFondPredavanja() {
+        return fondPredavanja;
+    }
+
+    public void setFondPredavanja(int fondPredavanja) {
+        this.fondPredavanja = fondPredavanja;
+    }
+
+    public int getFondVezbi() {
+        return fondVezbi;
+    }
+
+    public void setFondVezbi(int fondVezbi) {
+        this.fondVezbi = fondVezbi;
+    }
+
+    public int getFondLabVezbi() {
+        return fondLabVezbi;
+    }
+
+    public void setFondLabVezbi(int fondLabVezbi) {
+        this.fondLabVezbi = fondLabVezbi;
+    }
+
+    public boolean isAktivan() {
+        return aktivan;
+    }
+
+    public void setAktivan(boolean aktivan) {
+        this.aktivan = aktivan;
+    }
+
 }

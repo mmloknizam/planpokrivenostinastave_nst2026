@@ -21,12 +21,24 @@ public class RegisterRequestDto {
     private String lozinka;
     private Long ulogaID;
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public String getEmail() { 
+        return email; 
+    }
+    public void setEmail(String email) { 
+        this.email = email;
+    }
 
-    public String getLozinka() { return lozinka; }
-    public void setLozinka(String lozinka) { this.lozinka = lozinka; }
+    public String getLozinka() { 
+        return lozinka; 
+    }
+    public void setLozinka(String lozinka) { 
+        this.lozinka = lozinka; 
+    }
 
-    public Long getUlogaID() { return ulogaID; }
-    public void setUlogaID(Long ulogaID) { this.ulogaID = ulogaID; }
+    public Long getUlogaID() { 
+        return ulogaID; 
+    }
+    public void setUlogaID(Long ulogaID) { 
+        this.ulogaID = ulogaID; 
+    }
 }

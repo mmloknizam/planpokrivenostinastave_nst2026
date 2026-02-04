@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "http://localhost:3000")
 public class KorisnickiProfilController {
 
-    private KorisnickiProfilService korisnickiProfilService;
+    private final KorisnickiProfilService korisnickiProfilService;
 
     public KorisnickiProfilController(KorisnickiProfilService korisnickiProfilService) {
         this.korisnickiProfilService = korisnickiProfilService;

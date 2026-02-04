@@ -9,9 +9,11 @@ import com.example.SpringRestAppDemo.dto.LoginResponseDto;
 import com.example.SpringRestAppDemo.dto.RegisterRequestDto;
 import com.example.SpringRestAppDemo.dto.RegisterResponseDto;
 import com.example.SpringRestAppDemo.entity.KorisnickiProfil;
+import com.example.SpringRestAppDemo.entity.Nastavnik;
 import com.example.SpringRestAppDemo.entity.Uloga;
 import com.example.SpringRestAppDemo.entity.Verifikacija;
 import com.example.SpringRestAppDemo.repository.KorisnickiProfilRepository;
+import com.example.SpringRestAppDemo.repository.NastavnikRepository;
 import com.example.SpringRestAppDemo.repository.UlogaRepository;
 import com.example.SpringRestAppDemo.repository.VerifikacijaRepository;
 import com.example.SpringRestAppDemo.service.KorisnickiProfilService;
@@ -95,7 +97,6 @@ public class KorisnickiProfilServiceImpl implements KorisnickiProfilService {
     @Override
     public RegisterResponseDto confirmEmail(String email, String kod, String lozinka, Long ulogaID) throws Exception {
 
-        // Pronađi verifikaciju
         Verifikacija verifikacija = verifikacijaRepository.findByEmailAndKod(email, kod)
                 .orElseThrow(() -> new Exception("Nevažeći kod za verifikaciju."));
 
@@ -114,7 +115,6 @@ public class KorisnickiProfilServiceImpl implements KorisnickiProfilService {
 
         korisnickiProfilRepository.save(korisnik);
 
-        // Obriši verifikaciju
         verifikacijaRepository.delete(verifikacija);
 
         return new RegisterResponseDto("Korisnik uspešno aktiviran!");
@@ -160,4 +160,3 @@ public class KorisnickiProfilServiceImpl implements KorisnickiProfilService {
         return null;
     }
 }
-

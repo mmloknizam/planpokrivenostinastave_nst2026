@@ -206,7 +206,7 @@ public class PokrivenostNastaveServiceImpl implements PokrivenostNastaveService{
  
     @Override
     public PokrivenostNastaveDto savePlan(PokrivenostNastaveDto dto) {
-Long oblikId = dto.getOblikNastave().getOblikNastaveID();
+        Long oblikId = dto.getOblikNastave().getOblikNastaveID();
  
         int maxSati = switch (oblikId.intValue()) {
             case 1, 2 ->

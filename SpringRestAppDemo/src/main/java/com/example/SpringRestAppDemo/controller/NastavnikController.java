@@ -5,7 +5,9 @@
 package com.example.SpringRestAppDemo.controller;
  
 import com.example.SpringRestAppDemo.entity.Nastavnik;
+import com.example.SpringRestAppDemo.entity.Predmet;
 import com.example.SpringRestAppDemo.repository.NastavnikRepository;
+import com.example.SpringRestAppDemo.service.NastavnikPredmetService;
 import java.util.List;
 import org.springframework.web.bind.annotation.*;
 /**
@@ -18,13 +20,21 @@ import org.springframework.web.bind.annotation.*;
 public class NastavnikController {
  
     private final NastavnikRepository nastavnikRepository;
- 
-    public NastavnikController(NastavnikRepository nastavnikRepository) {
+    private final NastavnikPredmetService npService;
+
+    public NastavnikController(NastavnikRepository nastavnikRepository, NastavnikPredmetService npService) {
         this.nastavnikRepository = nastavnikRepository;
+        this.npService = npService;
     }
  
     @GetMapping
     public List<Nastavnik> findAll() {
         return nastavnikRepository.findAll();
     }
+    
+    @GetMapping("/{nastavnikID}/predmeti")
+    public List<Predmet> getPredmeti(@PathVariable Long nastavnikID) {
+        return npService.predmetiNastavnika(nastavnikID);
+    }
+
 }

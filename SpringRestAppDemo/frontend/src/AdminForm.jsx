@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import PlanPokrivenostiNastaveForm from "./PlanPokrivenostiNastaveForm";
 import PokrivenostNastaveForm from "./PokrivenostNastaveForm";
 import DetaljiPokrivenostiModal from "./DetaljiPokrivenostiModal";
+import Nastavnici from "./Nastavnici"; 
+import Predmeti from "./Predmeti"; 
 import axios from "axios";
-
 
 
 const AdminForm = ({
@@ -43,8 +44,10 @@ planovi, skolskeGodine, selectedGodinaID,
     return (
             <div>
                 <h2>Admin panel</h2>
-            
-                <button onClick={() => setView("plan")}>Prikaz plana</button>
+                <button onClick={() => setView("profil")}>Profil korisnika</button>
+                <button onClick={() => setView("plan")} style={{marginLeft: "10px"}}>Prikaz plana</button>
+                <button onClick={() => setView("nastavnici")} style={{marginLeft: "10px"}}>Nastavnici</button>
+                <button onClick={() => setView("predmeti")} style={{marginLeft: "10px"}}>Predmeti</button>
                 <button onClick={() => setView("kreiraj")} style={{marginLeft: "10px"}}>Kreiraj plan</button>
                 <hr />
             
@@ -69,7 +72,14 @@ planovi, skolskeGodine, selectedGodinaID,
                                 }}
                                 />
                         )}
-            
+                {view === "nastavnici" && (
+                            <Nastavnici />
+                                )}
+                        
+                {view === "predmeti" && (
+                            <Predmeti />
+                                )}
+                        
                 {showDetalji && (
                             <DetaljiPokrivenostiModal
                                 detalji={detalji}

@@ -7,7 +7,6 @@ package com.example.SpringRestAppDemo.controller;
 import com.example.SpringRestAppDemo.dto.PlanPokrivenostiNastaveDto;
 import com.example.SpringRestAppDemo.dto.PokrivenostNastaveDto;
 import com.example.SpringRestAppDemo.service.PokrivenostNastaveService;
-import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "http://localhost:3000")
 public class PokrivenostNastaveController {
 
-    private PokrivenostNastaveService pokrivenostNastaveService;
+    private final PokrivenostNastaveService pokrivenostNastaveService;
 
     public PokrivenostNastaveController(PokrivenostNastaveService pokrivenostNastaveService) {
         this.pokrivenostNastaveService = pokrivenostNastaveService;

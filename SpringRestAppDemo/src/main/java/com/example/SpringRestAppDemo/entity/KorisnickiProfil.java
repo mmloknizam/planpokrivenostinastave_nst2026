@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 /**
@@ -43,8 +44,7 @@ public class KorisnickiProfil {
         this.lozinka = lozinka;
         this.uloga = uloga;
     }
-
-
+    
     @Override
     public String toString() {
         return email;
@@ -89,4 +89,5 @@ public class KorisnickiProfil {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
+
 }

@@ -16,7 +16,7 @@ public class ConfirmEmailRequestDto implements Serializable{
     private String kod;
     private String lozinka;
     private Long ulogaID;
-
+    
     public String getEmail() { 
         return email;
     }
