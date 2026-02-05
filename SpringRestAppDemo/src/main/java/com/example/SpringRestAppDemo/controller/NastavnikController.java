@@ -32,9 +32,15 @@ public class NastavnikController {
         return nastavnikRepository.findAll();
     }
     
+    @GetMapping("/slobodni")
+    public List<Nastavnik> findSlobodniNastavnici() {
+        return nastavnikRepository.findSlobodniNastavnici();
+    }
+    
     @GetMapping("/{nastavnikID}/predmeti")
     public List<Predmet> getPredmeti(@PathVariable Long nastavnikID) {
         return npService.predmetiNastavnika(nastavnikID);
     }
+    
 
 }

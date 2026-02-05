@@ -9,10 +9,11 @@ function Nastavnici() {
     const fetchData = async () => {
       try {
         const response = await axios.get("/api/nastavnik");
-        setNastavnici(response.data);
+        const data = Array.isArray(response.data) ? response.data : [];
+        setNastavnici(data);
 
-        response.data.forEach(n => getPredmeti(n.nastavnikID));
-
+        // učitaj predmete svakog nastavnika
+        data.forEach(n => getPredmeti(n.nastavnikID));
       } catch (error) {
         console.error("Greška pri učitavanju nastavnika:", error);
       }
@@ -24,16 +25,17 @@ function Nastavnici() {
   const getPredmeti = async (nastavnikID) => {
     try {
       const response = await axios.get(`/api/nastavnik/${nastavnikID}/predmeti`);
-      setPredmeti(prev => ({ ...prev, [nastavnikID]: response.data }));
+      const predmetiData = Array.isArray(response.data) ? response.data : [];
+      setPredmeti(prev => ({ ...prev, [nastavnikID]: predmetiData }));
     } catch (error) {
       console.error(`Greška pri učitavanju predmeta za nastavnika ${nastavnikID}:`, error);
+      setPredmeti(prev => ({ ...prev, [nastavnikID]: [] }));
     }
   };
 
   return (
     <div>
       <h2>Lista nastavnika</h2>
-
       <table border="1">
         <thead>
           <tr>
@@ -44,14 +46,13 @@ function Nastavnici() {
             <th>Predmeti</th>
           </tr>
         </thead>
-
         <tbody>
           {nastavnici.map(n => (
             <tr key={n.nastavnikID}>
               <td>{n.nastavnikID}</td>
               <td>{n.ime}</td>
               <td>{n.prezime}</td>
-              <td>{n.zvanje ? n.zvanje.naziv : ""}</td>
+              <td>{n.zvanje?.naziv || ""}</td>
               <td>
                 {predmeti[n.nastavnikID]
                   ? predmeti[n.nastavnikID].map(p => p.naziv).join(", ")
@@ -66,4 +67,7 @@ function Nastavnici() {
 }
 
 export default Nastavnici;
+
+
+
 

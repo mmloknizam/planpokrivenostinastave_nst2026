@@ -17,7 +17,7 @@ public class KorisnickiProfilDto implements Serializable{
     private String email;
     private String lozinka;
     private Uloga uloga;
-
+    
     public KorisnickiProfilDto() {
     }
 

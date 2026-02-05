@@ -16,6 +16,7 @@ public class ConfirmEmailRequestDto implements Serializable{
     private String kod;
     private String lozinka;
     private Long ulogaID;
+    private Long nastavnikID;
     
     public String getEmail() { 
         return email;
@@ -46,4 +47,13 @@ public class ConfirmEmailRequestDto implements Serializable{
     public void setUlogaID(Long ulogaID) {
         this.ulogaID = ulogaID;
     }
+
+    public Long getNastavnikID() {
+        return nastavnikID;
+    }
+
+    public void setNastavnikID(Long nastavnikID) {
+        this.nastavnikID = nastavnikID;
+    }
+    
 }

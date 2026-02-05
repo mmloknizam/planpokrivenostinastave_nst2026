@@ -4,6 +4,7 @@
  */
 package com.example.SpringRestAppDemo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -31,6 +32,7 @@ public class Nastavnik {
     private Zvanje zvanje;
     @OneToOne
     @JoinColumn(name = "korisnickiProfilID")
+    @JsonIgnore
     private KorisnickiProfil korisnickiProfil;
 
     public Nastavnik() {

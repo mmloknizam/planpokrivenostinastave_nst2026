@@ -16,4 +16,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface KorisnickiProfilRepository extends JpaRepository<KorisnickiProfil, Long>{
     public Optional<KorisnickiProfil> findByEmail(String email);
+    public Optional<KorisnickiProfil> findByNastavnik_NastavnikID(Long nastavnikID);
 }

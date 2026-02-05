@@ -34,15 +34,19 @@ public class KorisnickiProfil {
     private Uloga uloga;
     @Column(name = "enabled")
     private boolean enabled = false;
+    @OneToOne
+    @JoinColumn(name = "nastavnikID")
+    private Nastavnik nastavnik;
 
     public KorisnickiProfil() {
     }
 
-    public KorisnickiProfil(Long korisnickiProfilID, String email, String lozinka, Uloga uloga) {
+    public KorisnickiProfil(Long korisnickiProfilID, String email, String lozinka, Uloga uloga, Nastavnik nastavnik) {
         this.korisnickiProfilID = korisnickiProfilID;
         this.email = email;
         this.lozinka = lozinka;
         this.uloga = uloga;
+        this.nastavnik = nastavnik;
     }
     
     @Override
@@ -88,6 +92,14 @@ public class KorisnickiProfil {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public Nastavnik getNastavnik() {
+        return nastavnik;
+    }
+
+    public void setNastavnik(Nastavnik nastavnik) {
+        this.nastavnik = nastavnik;
     }
 
 }

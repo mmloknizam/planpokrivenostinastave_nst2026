@@ -4,6 +4,8 @@
  */
 package com.example.SpringRestAppDemo.service.impl;
 
+import com.example.SpringRestAppDemo.dto.ConfirmEmailRequestDto;
+import com.example.SpringRestAppDemo.dto.KorisnickiProfilDto;
 import com.example.SpringRestAppDemo.dto.LoginRequestDto;
 import com.example.SpringRestAppDemo.dto.LoginResponseDto;
 import com.example.SpringRestAppDemo.dto.RegisterRequestDto;
@@ -12,6 +14,7 @@ import com.example.SpringRestAppDemo.entity.KorisnickiProfil;
 import com.example.SpringRestAppDemo.entity.Nastavnik;
 import com.example.SpringRestAppDemo.entity.Uloga;
 import com.example.SpringRestAppDemo.entity.Verifikacija;
+import com.example.SpringRestAppDemo.entity.Zvanje;
 import com.example.SpringRestAppDemo.repository.KorisnickiProfilRepository;
 import com.example.SpringRestAppDemo.repository.NastavnikRepository;
 import com.example.SpringRestAppDemo.repository.UlogaRepository;
@@ -32,13 +35,13 @@ public class KorisnickiProfilServiceImpl implements KorisnickiProfilService {
     private final KorisnickiProfilRepository korisnickiProfilRepository;
     private final UlogaRepository ulogaRepository;
     private final VerifikacijaRepository verifikacijaRepository;
+    private final NastavnikRepository nastavnikRepository;
 
-    public KorisnickiProfilServiceImpl(KorisnickiProfilRepository korisnickiProfilRepository,
-                                       UlogaRepository ulogaRepository,
-                                       VerifikacijaRepository verifikacijaRepository) {
+    public KorisnickiProfilServiceImpl(KorisnickiProfilRepository korisnickiProfilRepository, UlogaRepository ulogaRepository, VerifikacijaRepository verifikacijaRepository, NastavnikRepository nastavnikRepository) {
         this.korisnickiProfilRepository = korisnickiProfilRepository;
         this.ulogaRepository = ulogaRepository;
         this.verifikacijaRepository = verifikacijaRepository;
+        this.nastavnikRepository = nastavnikRepository;
     }
 
     @Override
@@ -93,32 +96,60 @@ public class KorisnickiProfilServiceImpl implements KorisnickiProfilService {
                 "Registracija uspešna! Proverite mejl i unesite verifikacioni kod. Kod važi 10 minuta."
         );
     }
-
     @Override
-    public RegisterResponseDto confirmEmail(String email, String kod, String lozinka, Long ulogaID) throws Exception {
+    public RegisterResponseDto confirmEmail(ConfirmEmailRequestDto request) throws Exception {
 
-        Verifikacija verifikacija = verifikacijaRepository.findByEmailAndKod(email, kod)
-                .orElseThrow(() -> new Exception("Nevažeći kod za verifikaciju."));
+        Verifikacija verifikacija = verifikacijaRepository
+                .findByEmailAndKod(request.getEmail(), request.getKod())
+                .orElseThrow(() -> new Exception("Nevažeći kod!"));
 
         if (verifikacija.getVreme().plusMinutes(10).isBefore(LocalDateTime.now())) {
-            throw new Exception("Kod je istekao. Molimo generišite novi kod.");
+            throw new Exception("Kod je istekao!");
         }
 
-        Uloga uloga = ulogaRepository.findById(ulogaID)
+        String passwordError = validatePassword(request.getLozinka());
+        if (passwordError != null) {
+            throw new Exception(passwordError);
+        }
+
+        Uloga uloga = ulogaRepository.findById(request.getUlogaID())
                 .orElseThrow(() -> new Exception("Uloga ne postoji!"));
 
+        if (request.getNastavnikID() != null &&
+            korisnickiProfilRepository.findByNastavnik_NastavnikID(request.getNastavnikID()).isPresent()) {
+            throw new Exception("Ovaj nastavnik je već registrovan!");
+        }
+
         KorisnickiProfil korisnik = new KorisnickiProfil();
-        korisnik.setEmail(email);
-        korisnik.setLozinka(lozinka);
+        korisnik.setEmail(request.getEmail());
+        korisnik.setLozinka(request.getLozinka());
         korisnik.setUloga(uloga);
         korisnik.setEnabled(true);
 
-        korisnickiProfilRepository.save(korisnik);
+        if (request.getNastavnikID() != null) {
+            Nastavnik nastavnik = nastavnikRepository
+                    .findById(request.getNastavnikID())
+                    .orElseThrow(() -> new Exception("Nastavnik ne postoji!"));
+
+            korisnik.setNastavnik(nastavnik);
+        }
+
+        korisnik = korisnickiProfilRepository.save(korisnik);
+
+        if (request.getNastavnikID() != null) {
+            Nastavnik nastavnik = korisnik.getNastavnik();
+            nastavnik.setKorisnickiProfil(korisnik);
+            nastavnikRepository.save(nastavnik);
+        }
 
         verifikacijaRepository.delete(verifikacija);
 
         return new RegisterResponseDto("Korisnik uspešno aktiviran!");
     }
+
+
+
+
 
     @Override
     public RegisterResponseDto resendVerificationCode(String email) throws Exception {
@@ -159,4 +190,5 @@ public class KorisnickiProfilServiceImpl implements KorisnickiProfilService {
         }
         return null;
     }
+
 }

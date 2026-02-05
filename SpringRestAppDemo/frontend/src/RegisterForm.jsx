@@ -5,8 +5,13 @@ function RegisterForm({ onBackToLogin }) {
   const [email, setEmail] = useState("");
   const [lozinka, setLozinka] = useState("");
   const [potvrdaLozinke, setPotvrdaLozinke] = useState("");
+
   const [ulogaID, setUlogaID] = useState("");
   const [uloge, setUloge] = useState([]);
+
+  const [nastavnikID, setNastavnikID] = useState("");
+  const [nastavnici, setNastavnici] = useState([]);
+
   const [loading, setLoading] = useState(false);
 
   const [poruka, setPoruka] = useState("");
@@ -16,7 +21,18 @@ function RegisterForm({ onBackToLogin }) {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
+
   const [kod, setKod] = useState("");
+
+  const loadSlobodniNastavnici = () => {
+    axios
+      .get("/api/nastavnik/slobodni")
+      .then((res) => setNastavnici(res.data))
+      .catch(() => {
+        setGreska("Nije moguće učitati nastavnike.");
+        setShowErrorModal(true);
+      });
+  };
 
   useEffect(() => {
     axios
@@ -26,11 +42,15 @@ function RegisterForm({ onBackToLogin }) {
         setGreska("Nije moguće učitati uloge.");
         setShowErrorModal(true);
       });
+
+    loadSlobodniNastavnici();
   }, []);
 
   const validateEmail = (email) => {
     const regex = /^[A-Za-z0-9._%+-]+@fon\.bg\.ac\.rs$/;
-    return regex.test(email) ? "" : "Email mora da se završava sa @fon.bg.ac.rs";
+    return regex.test(email)
+      ? ""
+      : "Email mora da se završava sa @fon.bg.ac.rs";
   };
 
   const validatePassword = (password) => {
@@ -38,7 +58,8 @@ function RegisterForm({ onBackToLogin }) {
     if (password.length < 8) errors.push("najmanje 8 karaktera");
     if (!/[A-Z]/.test(password)) errors.push("bar jedno veliko slovo");
     if (!/\d/.test(password)) errors.push("bar jedan broj");
-    if (!/[@#$%^&+=!?\.]/.test(password)) errors.push("bar jedan specijalni karakter");
+    if (!/[@#$%^&+=!?\.]/.test(password))
+      errors.push("bar jedan specijalni karakter");
     return errors;
   };
 
@@ -46,6 +67,12 @@ function RegisterForm({ onBackToLogin }) {
     e.preventDefault();
     setGreska("");
     setPoruka("");
+
+    if (!nastavnikID) {
+      setGreska("Morate izabrati nastavnika.");
+      setShowErrorModal(true);
+      return;
+    }
 
     const emailError = validateEmail(email);
     if (emailError) {
@@ -79,7 +106,9 @@ function RegisterForm({ onBackToLogin }) {
         email,
         lozinka,
         ulogaID,
+        nastavnikID
       });
+
       setPoruka(res.data.message || "Uspešna registracija!");
       setShowVerification(true);
     } catch (err) {
@@ -104,16 +133,20 @@ function RegisterForm({ onBackToLogin }) {
         kod,
         lozinka,
         ulogaID,
+        nastavnikID
       });
 
       setPoruka(res.data.message);
       setShowVerification(false);
-      
+
       setEmail("");
       setLozinka("");
       setPotvrdaLozinke("");
       setUlogaID("");
+      setNastavnikID("");
       setKod("");
+
+      loadSlobodniNastavnici();
     } catch (err) {
       setGreska(err.response?.data || "Greška pri potvrdi koda.");
       setShowErrorModal(true);
@@ -135,12 +168,48 @@ function RegisterForm({ onBackToLogin }) {
     }
   };
 
+  const handleBackToLogin = async () => {
+    try {
+      if (email) {
+        await axios.delete(`/api/auth/delete-code/${email}`);
+      }
+    } catch (err) {
+      console.log("Greška pri brisanju koda", err);
+    }
+
+    setEmail("");
+    setLozinka("");
+    setPotvrdaLozinke("");
+    setUlogaID("");
+    setNastavnikID("");
+    setKod("");
+    setShowVerification(false);
+
+    loadSlobodniNastavnici();
+
+    onBackToLogin();
+  };
+
   return (
     <div className="auth-container">
       <h2>Registracija korisnika</h2>
 
       {!showVerification ? (
         <form onSubmit={handleRegister} className="auth-form">
+
+          <select
+            value={nastavnikID}
+            onChange={(e) => setNastavnikID(e.target.value)}
+            required
+          >
+            <option value="">-- Izaberi nastavnika --</option>
+            {nastavnici.map((n) => (
+              <option key={n.nastavnikID} value={n.nastavnikID}>
+                {n.ime} {n.prezime}
+              </option>
+            ))}
+          </select>
+
           <input
             type="email"
             placeholder="Email"
@@ -148,6 +217,7 @@ function RegisterForm({ onBackToLogin }) {
             required
             onChange={(e) => setEmail(e.target.value)}
           />
+
           <input
             type="password"
             placeholder="Lozinka"
@@ -155,6 +225,7 @@ function RegisterForm({ onBackToLogin }) {
             required
             onChange={(e) => setLozinka(e.target.value)}
           />
+
           <input
             type="password"
             placeholder="Potvrda lozinke"
@@ -162,7 +233,12 @@ function RegisterForm({ onBackToLogin }) {
             required
             onChange={(e) => setPotvrdaLozinke(e.target.value)}
           />
-          <select value={ulogaID} onChange={(e) => setUlogaID(e.target.value)} required>
+
+          <select
+            value={ulogaID}
+            onChange={(e) => setUlogaID(e.target.value)}
+            required
+          >
             <option value="">-- Izaberite ulogu --</option>
             {uloge.map((u) => (
               <option key={u.ulogaID} value={u.ulogaID}>
@@ -170,7 +246,8 @@ function RegisterForm({ onBackToLogin }) {
               </option>
             ))}
           </select>
-          <button disabled={loading}>
+
+          <button disabled={loading || !nastavnikID}>
             {loading ? "Registrujem..." : "Registruj se"}
           </button>
         </form>
@@ -186,7 +263,7 @@ function RegisterForm({ onBackToLogin }) {
         </div>
       )}
 
-      <button onClick={onBackToLogin}>Nazad na login</button>
+      <button onClick={handleBackToLogin}>Nazad na login</button>
 
       {showPasswordModal && (
         <div className="modal-overlay">
@@ -217,4 +294,3 @@ function RegisterForm({ onBackToLogin }) {
 }
 
 export default RegisterForm;
-
