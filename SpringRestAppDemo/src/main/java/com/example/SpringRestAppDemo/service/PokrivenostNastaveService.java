@@ -21,4 +21,5 @@ public interface PokrivenostNastaveService {
     void deleteOne(Long id);
     PokrivenostNastaveDto savePlan(PokrivenostNastaveDto dto) throws Exception;
     PokrivenostNastaveDto saveDetalji(PokrivenostNastaveDto dto);
+    PokrivenostNastaveDto updateDetalji(Long id,PokrivenostNastaveDto dto);
 }

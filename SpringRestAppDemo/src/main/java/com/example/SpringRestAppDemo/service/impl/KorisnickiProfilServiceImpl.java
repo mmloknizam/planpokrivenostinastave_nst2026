@@ -4,12 +4,17 @@
  */
 package com.example.SpringRestAppDemo.service.impl;
 
+import com.example.SpringRestAppDemo.dto.BrisanjeProfilaDto;
 import com.example.SpringRestAppDemo.dto.ConfirmEmailRequestDto;
-import com.example.SpringRestAppDemo.dto.KorisnickiProfilDto;
+import com.example.SpringRestAppDemo.dto.IzmenaProfilaDto;
 import com.example.SpringRestAppDemo.dto.LoginRequestDto;
 import com.example.SpringRestAppDemo.dto.LoginResponseDto;
+import com.example.SpringRestAppDemo.dto.ProfilKorisnikaDto;
+import com.example.SpringRestAppDemo.dto.PromenaLozinkeDto;
 import com.example.SpringRestAppDemo.dto.RegisterRequestDto;
 import com.example.SpringRestAppDemo.dto.RegisterResponseDto;
+import com.example.SpringRestAppDemo.dto.UlogaDto;
+import com.example.SpringRestAppDemo.dto.ZvanjeDto;
 import com.example.SpringRestAppDemo.entity.KorisnickiProfil;
 import com.example.SpringRestAppDemo.entity.Nastavnik;
 import com.example.SpringRestAppDemo.entity.Uloga;
@@ -19,8 +24,10 @@ import com.example.SpringRestAppDemo.repository.KorisnickiProfilRepository;
 import com.example.SpringRestAppDemo.repository.NastavnikRepository;
 import com.example.SpringRestAppDemo.repository.UlogaRepository;
 import com.example.SpringRestAppDemo.repository.VerifikacijaRepository;
+import com.example.SpringRestAppDemo.repository.ZvanjeRepository;
 import com.example.SpringRestAppDemo.service.KorisnickiProfilService;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
@@ -36,13 +43,16 @@ public class KorisnickiProfilServiceImpl implements KorisnickiProfilService {
     private final UlogaRepository ulogaRepository;
     private final VerifikacijaRepository verifikacijaRepository;
     private final NastavnikRepository nastavnikRepository;
+    private final ZvanjeRepository zvanjeRepository;
 
-    public KorisnickiProfilServiceImpl(KorisnickiProfilRepository korisnickiProfilRepository, UlogaRepository ulogaRepository, VerifikacijaRepository verifikacijaRepository, NastavnikRepository nastavnikRepository) {
+    public KorisnickiProfilServiceImpl(KorisnickiProfilRepository korisnickiProfilRepository, UlogaRepository ulogaRepository, VerifikacijaRepository verifikacijaRepository, NastavnikRepository nastavnikRepository, ZvanjeRepository zvanjeRepository) {
         this.korisnickiProfilRepository = korisnickiProfilRepository;
         this.ulogaRepository = ulogaRepository;
         this.verifikacijaRepository = verifikacijaRepository;
         this.nastavnikRepository = nastavnikRepository;
+        this.zvanjeRepository = zvanjeRepository;
     }
+
 
     @Override
     public LoginResponseDto login(LoginRequestDto request) throws Exception {
@@ -63,9 +73,10 @@ public class KorisnickiProfilServiceImpl implements KorisnickiProfilService {
         }
 
         return new LoginResponseDto(
-                "dummy-token",
+                "dummy-token",  
                 korisnik.getEmail(),
-                korisnik.getUloga().toString()
+                korisnik.getUloga().toString(),
+                korisnik.getKorisnickiProfilID() 
         );
     }
 
@@ -147,10 +158,6 @@ public class KorisnickiProfilServiceImpl implements KorisnickiProfilService {
         return new RegisterResponseDto("Korisnik uspešno aktiviran!");
     }
 
-
-
-
-
     @Override
     public RegisterResponseDto resendVerificationCode(String email) throws Exception {
         Verifikacija verifikacija = verifikacijaRepository.findByEmail(email)
@@ -189,6 +196,98 @@ public class KorisnickiProfilServiceImpl implements KorisnickiProfilService {
             return "Lozinka mora imati bar jedan specijalan karakter (@#$%^&+=!?.*)";
         }
         return null;
+    }
+
+     @Override
+    public ProfilKorisnikaDto getProfilKorisnika(Long korisnickiProfilID) throws Exception {
+        KorisnickiProfil korisnik = korisnickiProfilRepository.findById(korisnickiProfilID)
+                .orElseThrow(() -> new Exception("Korisnik ne postoji!"));
+
+        Nastavnik nastavnik = korisnik.getNastavnik();
+        Zvanje zvanje = nastavnik != null ? nastavnik.getZvanje() : null;
+
+        return new ProfilKorisnikaDto(
+                korisnik.getKorisnickiProfilID(),
+                korisnik.getEmail(),
+                korisnik.getUloga() != null ? korisnik.getUloga().getUlogaID() : null,
+                korisnik.getUloga() != null ? korisnik.getUloga().getTip() : null,
+                nastavnik != null ? nastavnik.getNastavnikID() : null,
+                nastavnik != null ? nastavnik.getIme() : null,
+                nastavnik != null ? nastavnik.getPrezime() : null,
+                zvanje != null ? zvanje.getZvanjeID() : null,
+                zvanje != null ? zvanje.getNaziv() : null
+        );
+    }
+
+    @Override
+    public ProfilKorisnikaDto izmeniProfil(Long korisnickiProfilID, IzmenaProfilaDto izmena) throws Exception {
+        KorisnickiProfil korisnik = korisnickiProfilRepository.findById(korisnickiProfilID)
+                .orElseThrow(() -> new Exception("Korisnik ne postoji!"));
+
+        if (izmena.getUlogaID() != null) {
+            Uloga uloga = ulogaRepository.findById(izmena.getUlogaID())
+                    .orElseThrow(() -> new Exception("Uloga ne postoji!"));
+            korisnik.setUloga(uloga);
+        }
+
+        if (izmena.getZvanjeID() != null && korisnik.getNastavnik() != null) {
+            Zvanje zvanje = zvanjeRepository.findById(izmena.getZvanjeID())
+                    .orElseThrow(() -> new Exception("Zvanje ne postoji!"));
+            korisnik.getNastavnik().setZvanje(zvanje);
+            nastavnikRepository.save(korisnik.getNastavnik());
+        }
+
+        korisnik = korisnickiProfilRepository.save(korisnik);
+
+        return getProfilKorisnika(korisnik.getKorisnickiProfilID());
+    }
+
+    @Override
+    public void promeniLozinku(Long korisnickiProfilID, PromenaLozinkeDto dto) throws Exception {
+        KorisnickiProfil korisnik = korisnickiProfilRepository.findById(korisnickiProfilID)
+                .orElseThrow(() -> new Exception("Korisnik ne postoji!"));
+
+        if (!korisnik.getLozinka().equals(dto.getStaraLozinka())) {
+            throw new Exception("Stara lozinka nije tačna!");
+        }
+
+        String passwordError = validatePassword(dto.getNovaLozinka());
+        if (passwordError != null) throw new Exception(passwordError);
+
+        korisnik.setLozinka(dto.getNovaLozinka());
+        korisnickiProfilRepository.save(korisnik);
+    }
+
+    @Override
+    public void obrisiProfil(Long korisnickiProfilID, BrisanjeProfilaDto dto) throws Exception {
+        KorisnickiProfil korisnik = korisnickiProfilRepository.findById(korisnickiProfilID)
+                .orElseThrow(() -> new Exception("Korisnik ne postoji!"));
+
+        if (!korisnik.getLozinka().equals(dto.getLozinka())) {
+            throw new Exception("Lozinka nije tačna!");
+        }
+
+        if (korisnik.getNastavnik() != null) {
+            korisnik.getNastavnik().setKorisnickiProfil(null);
+            korisnik.setNastavnik(null); 
+        }
+
+        korisnickiProfilRepository.delete(korisnik);
+    }
+
+
+    @Override
+    public List<UlogaDto> getSveUloge() {
+        return ulogaRepository.findAll().stream()
+                .map(u -> new UlogaDto(u.getUlogaID(), u.getTip()))
+                .toList();
+    }
+
+    @Override
+    public List<ZvanjeDto> getSvaZvanja() {
+        return zvanjeRepository.findAll().stream()
+                .map(z -> new ZvanjeDto(z.getZvanjeID(), z.getNaziv()))
+                .toList();
     }
 
 }

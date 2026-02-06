@@ -14,14 +14,16 @@ public class LoginResponseDto implements Serializable{
     private String token;
     private String email;
     private String uloga;
+    private Long korisnickiProfilID;
 
     public LoginResponseDto() {
     }
 
-    public LoginResponseDto(String token, String email, String uloga) {
+    public LoginResponseDto(String token, String email, String uloga, Long korisnickiProfilID) {
         this.token = token;
         this.email = email;
         this.uloga = uloga;
+        this.korisnickiProfilID = korisnickiProfilID;
     }
 
     public String getToken() {
@@ -34,6 +36,14 @@ public class LoginResponseDto implements Serializable{
 
     public String getUloga() {
         return uloga;
+    }
+
+    public Long getKorisnickiProfilID() {
+        return korisnickiProfilID;
+    }
+
+    public void setKorisnickiProfilID(Long korisnickiProfilID) {
+        this.korisnickiProfilID = korisnickiProfilID;
     }
 
 }

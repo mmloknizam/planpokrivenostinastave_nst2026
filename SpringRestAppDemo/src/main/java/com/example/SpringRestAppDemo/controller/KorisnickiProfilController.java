@@ -4,15 +4,21 @@
  */
 package com.example.SpringRestAppDemo.controller;
 
+import com.example.SpringRestAppDemo.dto.BrisanjeProfilaDto;
 import com.example.SpringRestAppDemo.dto.ConfirmEmailRequestDto;
-import com.example.SpringRestAppDemo.dto.KorisnickiProfilDto;
+import com.example.SpringRestAppDemo.dto.IzmenaProfilaDto;
 import com.example.SpringRestAppDemo.dto.LoginRequestDto;
 import com.example.SpringRestAppDemo.dto.LoginResponseDto;
+import com.example.SpringRestAppDemo.dto.ProfilKorisnikaDto;
+import com.example.SpringRestAppDemo.dto.PromenaLozinkeDto;
 import com.example.SpringRestAppDemo.dto.RegisterRequestDto;
 import com.example.SpringRestAppDemo.dto.RegisterResponseDto;
 import com.example.SpringRestAppDemo.dto.ResendCodeRequestDto;
+import com.example.SpringRestAppDemo.dto.UlogaDto;
+import com.example.SpringRestAppDemo.dto.ZvanjeDto;
 import com.example.SpringRestAppDemo.repository.VerifikacijaRepository;
 import com.example.SpringRestAppDemo.service.KorisnickiProfilService;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -21,6 +27,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -68,6 +75,43 @@ public class KorisnickiProfilController {
         return ResponseEntity.ok("Kod obrisan");
     }
 
+    @GetMapping("/profil/{id}")
+    public ResponseEntity<ProfilKorisnikaDto> getProfil(@PathVariable Long id) throws Exception {
+        return ResponseEntity.ok(korisnickiProfilService.getProfilKorisnika(id));
+    }
+
+    @PutMapping("/profil/{id}")
+    public ResponseEntity<ProfilKorisnikaDto> izmeniProfil(
+            @PathVariable Long id,
+            @RequestBody IzmenaProfilaDto izmena) throws Exception {
+        return ResponseEntity.ok(korisnickiProfilService.izmeniProfil(id, izmena));
+    }
+
+    @PutMapping("/profil/{id}/lozinka")
+    public ResponseEntity<String> promeniLozinku(
+            @PathVariable Long id,
+            @RequestBody PromenaLozinkeDto dto) throws Exception {
+        korisnickiProfilService.promeniLozinku(id, dto);
+        return ResponseEntity.ok("Lozinka uspešno promenjena");
+    }
+
+    @DeleteMapping("/profil/{id}")
+    public ResponseEntity<String> obrisiProfil(
+            @PathVariable Long id,
+            @RequestBody BrisanjeProfilaDto dto) throws Exception {
+        korisnickiProfilService.obrisiProfil(id, dto);
+        return ResponseEntity.ok("Profil obrisan");
+    }
+
+    @GetMapping("/uloge")
+    public ResponseEntity<List<UlogaDto>> getSveUloge() {
+        return ResponseEntity.ok(korisnickiProfilService.getSveUloge());
+    }
+
+    @GetMapping("/zvanja")
+    public ResponseEntity<List<ZvanjeDto>> getSvaZvanja() {
+        return ResponseEntity.ok(korisnickiProfilService.getSvaZvanja());
+    }
     
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<String> handleException(Exception e){

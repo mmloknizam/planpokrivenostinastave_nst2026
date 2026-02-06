@@ -35,7 +35,7 @@ public class KorisnickiProfil {
     @Column(name = "enabled")
     private boolean enabled = false;
     @OneToOne
-    @JoinColumn(name = "nastavnikID")
+    @JoinColumn(name = "nastavnikID", nullable = true)
     private Nastavnik nastavnik;
 
     public KorisnickiProfil() {

@@ -8,6 +8,7 @@ import com.example.SpringRestAppDemo.entity.Nastavnik;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -21,5 +22,11 @@ public interface NastavnikRepository extends JpaRepository<Nastavnik, Long>{
            "(SELECT k.nastavnik.nastavnikID FROM KorisnickiProfil k WHERE k.nastavnik IS NOT NULL)")
     public List<Nastavnik> findSlobodniNastavnici();
 
-    
+    @Query("""
+    SELECT n
+    FROM Nastavnik n
+    JOIN NastavnikPredmet np ON n.nastavnikID = np.nastavnik.nastavnikID
+    WHERE np.predmet.predmetID = :predmetID
+    """)
+    List<Nastavnik> findNastavniciZaPredmet(@Param("predmetID") Long predmetID);
 }

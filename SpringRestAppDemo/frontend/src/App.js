@@ -9,6 +9,7 @@ import "./App.css";
 
 function App() {
     const [user, setUser] = useState(null);
+    const [showLogin, setShowLogin] = useState(true); // novi state za prikaz login forme
     const [showRegister, setShowRegister] = useState(false);
 
     const [planovi, setPlanovi] = useState([]);
@@ -18,6 +19,7 @@ function App() {
     const handleLogout = () => {
         localStorage.removeItem("token");
         setUser(null);
+        setShowLogin(true);
         setPlanovi([]);
         setSelectedGodinaID("");
     };
@@ -25,9 +27,7 @@ function App() {
     const obrisiRed = async (ids) => {
         try {
             await axios.delete("/api/pokrivenostnastave", { data: ids });
-            const res = await axios.get(
-                `/api/pokrivenostnastave/plan/${selectedGodinaID}`
-            );
+            const res = await axios.get(`/api/pokrivenostnastave/plan/${selectedGodinaID}`);
             setPlanovi(res.data);
         } catch (err) {
             console.error(err);
@@ -57,31 +57,28 @@ function App() {
                 showRegister ? (
                     <RegisterForm onBackToLogin={() => setShowRegister(false)} />
                 ) : (
-                    <LoginForm
-                        setUser={setUser}
-                        setShowRegister={setShowRegister}
-                    />
+                    showLogin && <LoginForm setUser={setUser} setShowRegister={setShowRegister} />
                 )
             ) : (
                 <>
                     <div className="user-bar">
                         <span className="user-info">
-                            <b>{user.email}</b> | Uloga:{" "}
-                            <b>{user.uloga}</b>
+                            <b>{user.email}</b> | Uloga: <b>{user.uloga}</b>
                         </span>
                         <button onClick={handleLogout}>Odjavi se</button>
                     </div>
 
                     <AdminForm
+                        korisnickiProfilID={user.korisnickiProfilID}
                         planovi={planovi}
                         skolskeGodine={skolskeGodine}
                         selectedGodinaID={selectedGodinaID}
-                        onGodinaChange={(e) =>
-                            setSelectedGodinaID(e.target.value)
-                        }
+                        onGodinaChange={(e) => setSelectedGodinaID(e.target.value)}
                         obrisiRed={obrisiRed}
                         setPlanovi={setPlanovi}
-                        isAdmin={user.uloga === "Administrator"}
+                        isAdmin={user.uloga === "ADMINISTRATOR"}
+                        setUser={setUser}          // PROSLEĐENO
+                        setShowLogin={setShowLogin} // PROSLEĐENO
                     />
                 </>
             )}

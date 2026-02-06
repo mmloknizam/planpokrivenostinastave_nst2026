@@ -42,5 +42,8 @@ public class NastavnikController {
         return npService.predmetiNastavnika(nastavnikID);
     }
     
-
+    @GetMapping("/predmet/{predmetID}")
+    public List<Nastavnik> getNastavniciZaPredmet(@PathVariable Long predmetID) {
+        return nastavnikRepository.findNastavniciZaPredmet(predmetID);
+    }
 }

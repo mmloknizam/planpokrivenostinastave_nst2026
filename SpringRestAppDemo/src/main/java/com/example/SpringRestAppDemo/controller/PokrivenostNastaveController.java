@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -76,6 +77,13 @@ public class PokrivenostNastaveController {
             @RequestBody PokrivenostNastaveDto dto) {
         return ResponseEntity.ok(pokrivenostNastaveService.saveDetalji(dto));
     }
+    
+       @PutMapping("/detalji/{id}")
+    public ResponseEntity<PokrivenostNastaveDto> updateDetalji(
+        @PathVariable Long id,
+        @RequestBody PokrivenostNastaveDto dto) {
+    return ResponseEntity.ok(pokrivenostNastaveService.updateDetalji(id, dto));
+}
     
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<String> handleException(Exception e){

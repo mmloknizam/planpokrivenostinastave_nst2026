@@ -1,99 +1,133 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import DodajNastavnikaNaPredmetModal from "./DodajNastavnikaNaPredmetModal";
 
 const DetaljiPokrivenostiModal = ({ detalji, setDetalji, onClose, onSave }) => {
   const [sviNastavnici, setSviNastavnici] = useState([]);
-
-  // Učitaj sve nastavnike pri mount-u
-  useEffect(() => {
-    axios.get("/api/nastavnik")
-      .then(res => setSviNastavnici(Array.isArray(res.data) ? res.data : []))
-      .catch(err => console.error(err));
-  }, []);
-
-  if (!Array.isArray(detalji) || detalji.length === 0) return null;
+  const [obliciNastave, setObliciNastave] = useState([]);
+  const [showDodajModal, setShowDodajModal] = useState(false);
 
   const LIMITI = {
-    "Predavanja": 60,
-    "Vezbe": 60,
+    Predavanja: 60,
+    Vezbe: 60,
     "Laboratorijske vezbe": 30
   };
 
-  const sumByOblik = (tip) =>
+  useEffect(() => {
+    if (!detalji || detalji.length === 0) return;
+
+    const predmetID = detalji[0].predmet.predmetID;
+
+    axios.get(`/api/nastavnik/predmet/${predmetID}`)
+         .then(res => setSviNastavnici(res.data));
+
+    axios.get("/api/obliknastave")
+         .then(res => setObliciNastave(res.data));
+
+  }, [detalji]);
+
+  if (!detalji) return null;
+
+  const sumByOblik = tip =>
     detalji
-      .filter(d => d.oblikNastave?.tip === tip)
+      .filter(d => d.oblikNastave.tip === tip)
       .reduce((sum, d) => sum + (d.brojSatiNastave || 0), 0);
 
   const handleChangeSati = (id, value) => {
     const broj = parseInt(value) || 0;
     const row = detalji.find(d => d.pokrivenostNastaveID === id);
-    const maxSati = row?.oblikNastave?.tip ? LIMITI[row.oblikNastave.tip] : null;
+    const maxSati = LIMITI[row.oblikNastave.tip];
 
-    if (broj < 1) return;
-
-    if (maxSati !== null && broj > maxSati) {
-      alert(`Maksimalan broj sati za ${row.oblikNastave.tip} je ${maxSati}`);
+    if (broj > maxSati) {
+      alert(`Maksimalno sati za ${row.oblikNastave.tip} je ${maxSati}`);
       return;
     }
 
-    setDetalji(detalji.map(d =>
-      d.pokrivenostNastaveID === id
-        ? { ...d, brojSatiNastave: broj }
-        : d
-    ));
+    setDetalji(
+      detalji.map(d =>
+        d.pokrivenostNastaveID === id
+          ? { ...d, brojSatiNastave: broj }
+          : d
+      )
+    );
   };
 
   const handleChangeNastavnik = (id, noviNastavnik) => {
-    setDetalji(detalji.map(d =>
-      d.pokrivenostNastaveID === id
-        ? { ...d, nastavnik: noviNastavnik }
-        : d
-    ));
+    setDetalji(
+      detalji.map(d =>
+        d.pokrivenostNastaveID === id
+          ? { ...d, nastavnik: noviNastavnik }
+          : d
+      )
+    );
   };
 
-  const sacuvaj = async (row) => {
+  /*const sacuvaj = async row => {
     try {
       await axios.post("/api/pokrivenostnastave/detalji", row);
-      alert("Izmene sačuvane!");
       onSave?.();
-    } catch (err) {
-      const msg = err.response?.data || "Došlo je do greške pri čuvanju.";
-      alert(msg);
+      alert("Izmene sačuvane!");
+    } catch {
+      alert("Greška pri čuvanju");
     }
-  };
+  };*/
+    
+    const sacuvaj = async row => {
+  try {
+    if (row.pokrivenostNastaveID) {
+      // Update postojeći red
+      await axios.put(`/api/pokrivenostnastave/detalji/${row.pokrivenostNastaveID}`, row);
+    } else {
+      // Novi red
+      await axios.post("/api/pokrivenostnastave/detalji", row);
+    }
+    onSave?.();
+    alert("Izmene sačuvane!");
+  } catch (e) {
+    alert("Greška pri čuvanju: " + e.response?.data?.message || e.message);
+  }
+};
 
-  const obrisiJednog = async (id) => {
-    if (!window.confirm("Obrisati ovog nastavnika?")) return;
+
+  const obrisiJednog = async id => {
+    if (!window.confirm("Obrisati?")) return;
+
     try {
       await axios.delete(`/api/pokrivenostnastave/${id}`);
       setDetalji(detalji.filter(d => d.pokrivenostNastaveID !== id));
       onSave?.();
-    } catch (err) {
-      console.error(err);
-      alert("Greška pri brisanju!");
+    } catch {
+      alert("Greška pri brisanju");
     }
   };
 
   return (
     <div className="modal-overlay">
       <div className="modal">
+
         <h3>Detalji pokrivenosti</h3>
 
-        <div style={{ marginBottom: "12px" }}>
-          <b>Predavanja:</b> {sumByOblik("Predavanja")} / 60h <br />
-          <b>Vežbe:</b> {sumByOblik("Vezbe")} / 60h <br />
-          <b>Laboratorijske vežbe:</b> {sumByOblik("Laboratorijske vezbe")} / 30h
+        <div style={{ marginBottom: 12 }}>
+          <b>Predavanja:</b> {sumByOblik("Predavanja")} / 60h<br/>
+          <b>Vežbe:</b> {sumByOblik("Vezbe")} / 60h<br/>
+          <b>Laboratorijske:</b> {sumByOblik("Laboratorijske vezbe")} / 30h
         </div>
+
+        {/* Dugme za novi modal */}
+        <button onClick={() => setShowDodajModal(true)}>
+          + Dodaj nastavnika na predmet
+        </button>
 
         <table>
           <thead>
             <tr>
               <th>Nastavnik</th>
-              <th>Oblik nastave</th>
+              <th>Oblik</th>
               <th>Sati</th>
               <th>Akcije</th>
             </tr>
           </thead>
+
           <tbody>
             {detalji.map(d => (
               <tr key={d.pokrivenostNastaveID}>
@@ -103,13 +137,11 @@ const DetaljiPokrivenostiModal = ({ detalji, setDetalji, onClose, onSave }) => {
                     onChange={e =>
                       handleChangeNastavnik(
                         d.pokrivenostNastaveID,
-                        sviNastavnici.find(
-                          n => n.nastavnikID === parseInt(e.target.value)
-                        )
+                        sviNastavnici.find(n => n.nastavnikID == e.target.value)
                       )
                     }
                   >
-                    <option value="">-- Izaberi nastavnika --</option>
+                    <option value="">-- Izaberi --</option>
                     {sviNastavnici.map(n => (
                       <option key={n.nastavnikID} value={n.nastavnikID}>
                         {n.ime} {n.prezime}
@@ -117,34 +149,51 @@ const DetaljiPokrivenostiModal = ({ detalji, setDetalji, onClose, onSave }) => {
                     ))}
                   </select>
                 </td>
-                <td>{d.oblikNastave?.tip || ""}</td>
+
+                <td>{d.oblikNastave.tip}</td>
+
                 <td>
                   <input
                     type="number"
-                    className="sati-input"
-                    value={d.brojSatiNastave || ""}
-                    onChange={e => handleChangeSati(d.pokrivenostNastaveID, e.target.value)}
-                    min={1}
-                    max={LIMITI[d.oblikNastave?.tip] || 100}
+                    value={d.brojSatiNastave}
+                    onChange={e =>
+                      handleChangeSati(d.pokrivenostNastaveID, e.target.value)
+                    }
                   />
                 </td>
-                <td style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <button className="table-btn" onClick={() => sacuvaj(d)}>Sačuvaj</button>
-                  <button className="table-btn" onClick={() => obrisiJednog(d.pokrivenostNastaveID)}>Obriši</button>
+
+                <td>
+                  <button onClick={() => sacuvaj(d)}>Sačuvaj</button>
+                  <button onClick={() => obrisiJednog(d.pokrivenostNastaveID)}>
+                    Obriši
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
 
-        <div style={{ marginTop: "15px", textAlign: "right" }}>
+        <div style={{ textAlign: "right", marginTop: 10 }}>
           <button onClick={onClose}>Zatvori</button>
         </div>
+
+        {/* MODAL ZA DODAVANJE */}
+        {showDodajModal && (
+          <DodajNastavnikaNaPredmetModal
+            predmetID={detalji[0].predmet.predmetID}
+            obliciNastave={obliciNastave}
+               postojeciDetalji={detalji} 
+            onClose={() => setShowDodajModal(false)}
+            onAdded={novi => {
+              setDetalji([...detalji, novi]);
+              onSave?.();
+            }}
+          />
+        )}
+
       </div>
     </div>
   );
 };
 
 export default DetaljiPokrivenostiModal;
-
-
