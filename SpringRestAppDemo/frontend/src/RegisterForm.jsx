@@ -17,12 +17,14 @@ function RegisterForm({ onBackToLogin }) {
   const [poruka, setPoruka] = useState("");
   const [greska, setGreska] = useState("");
   const [greskeLozinke, setGreskeLozinke] = useState([]);
+  const [adminGreska, setAdminGreska] = useState("");
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
 
   const [kod, setKod] = useState("");
+  const [adminSifra, setAdminSifra] = useState(""); // šifra za administratora
 
   const loadSlobodniNastavnici = () => {
     axios
@@ -67,6 +69,7 @@ function RegisterForm({ onBackToLogin }) {
     e.preventDefault();
     setGreska("");
     setPoruka("");
+    setAdminGreska("");
 
     if (!nastavnikID) {
       setGreska("Morate izabrati nastavnika.");
@@ -100,17 +103,27 @@ function RegisterForm({ onBackToLogin }) {
       return;
     }
 
+    // Provera šifre za administratora
+    if (uloge.find((u) => String(u.ulogaID) === String(ulogaID))?.tip === "Administrator") {
+      if (adminSifra !== "AdminFon") {
+        setAdminGreska("Pogrešna šifra za registraciju kao Administrator!");
+        return;
+      }
+    }
+
     try {
       setLoading(true);
       const res = await axios.post("/api/auth/register", {
         email,
         lozinka,
         ulogaID,
-        nastavnikID
+        nastavnikID,
+        adminSifra // <--- šaljemo backend-u
       });
 
       setPoruka(res.data.message || "Uspešna registracija!");
       setShowVerification(true);
+      setAdminSifra("");
     } catch (err) {
       setGreska(err.response?.data || "Greška pri registraciji.");
       setShowErrorModal(true);
@@ -145,7 +158,7 @@ function RegisterForm({ onBackToLogin }) {
       setUlogaID("");
       setNastavnikID("");
       setKod("");
-
+      setAdminSifra("");
       loadSlobodniNastavnici();
     } catch (err) {
       setGreska(err.response?.data || "Greška pri potvrdi koda.");
@@ -183,6 +196,8 @@ function RegisterForm({ onBackToLogin }) {
     setUlogaID("");
     setNastavnikID("");
     setKod("");
+    setAdminSifra("");
+    setAdminGreska("");
     setShowVerification(false);
 
     loadSlobodniNastavnici();
@@ -196,7 +211,6 @@ function RegisterForm({ onBackToLogin }) {
 
       {!showVerification ? (
         <form onSubmit={handleRegister} className="auth-form">
-
           <select
             value={nastavnikID}
             onChange={(e) => setNastavnikID(e.target.value)}
@@ -236,7 +250,11 @@ function RegisterForm({ onBackToLogin }) {
 
           <select
             value={ulogaID}
-            onChange={(e) => setUlogaID(e.target.value)}
+            onChange={(e) => {
+              setUlogaID(e.target.value);
+              setAdminGreska("");
+              setAdminSifra("");
+            }}
             required
           >
             <option value="">-- Izaberite ulogu --</option>
@@ -246,6 +264,20 @@ function RegisterForm({ onBackToLogin }) {
               </option>
             ))}
           </select>
+
+          {/* Polje za šifru ako je Administrator */}
+          {uloge.find((u) => String(u.ulogaID) === String(ulogaID))?.tip === "Administrator" && (
+            <>
+              <input
+                type="password"
+                placeholder="Unesite šifru za administratora"
+                value={adminSifra}
+                onChange={(e) => setAdminSifra(e.target.value)}
+                required
+              />
+              {adminGreska && <p style={{ color: "red" }}>{adminGreska}</p>}
+            </>
+          )}
 
           <button disabled={loading || !nastavnikID}>
             {loading ? "Registrujem..." : "Registruj se"}

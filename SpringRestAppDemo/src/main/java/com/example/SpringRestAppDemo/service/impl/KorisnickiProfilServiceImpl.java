@@ -93,6 +93,15 @@ public class KorisnickiProfilServiceImpl implements KorisnickiProfilService {
             throw new Exception(passwordError);
         }
 
+        Uloga uloga = ulogaRepository.findById(request.getUlogaID())
+                .orElseThrow(() -> new Exception("Uloga ne postoji!"));
+
+        if ("Administrator".equals(uloga.getTip())) {
+            if (!"AdminFon".equals(request.getAdminSifra())) {
+                throw new Exception("Pogrešna šifra za registraciju kao Administrator!");
+            }
+        }
+
         String kod = UUID.randomUUID().toString();
         Verifikacija verifikacija = new Verifikacija();
         verifikacija.setEmail(request.getEmail());
@@ -107,6 +116,7 @@ public class KorisnickiProfilServiceImpl implements KorisnickiProfilService {
                 "Registracija uspešna! Proverite mejl i unesite verifikacioni kod. Kod važi 10 minuta."
         );
     }
+
     @Override
     public RegisterResponseDto confirmEmail(ConfirmEmailRequestDto request) throws Exception {
 

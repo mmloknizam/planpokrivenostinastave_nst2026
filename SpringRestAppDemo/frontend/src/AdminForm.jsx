@@ -73,7 +73,12 @@ const AdminForm = ({
       {view === "profil" && korisnickiProfilID && (
         <KorisnickiProfil
           korisnickiProfilID={korisnickiProfilID}
-          setUser={setUser}  
+          setUser={(prev) =>
+            setUser({
+              ...prev,
+              // ovde se mogu osvežiti podaci koji dođu sa backend-a
+            })
+          }
           setShowLogin={setShowLogin}
         />
       )}

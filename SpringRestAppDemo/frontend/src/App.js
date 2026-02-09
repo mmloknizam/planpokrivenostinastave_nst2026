@@ -9,7 +9,7 @@ import "./App.css";
 
 function App() {
     const [user, setUser] = useState(null);
-    const [showLogin, setShowLogin] = useState(true); // novi state za prikaz login forme
+    const [showLogin, setShowLogin] = useState(true); 
     const [showRegister, setShowRegister] = useState(false);
 
     const [planovi, setPlanovi] = useState([]);
@@ -76,9 +76,9 @@ function App() {
                         onGodinaChange={(e) => setSelectedGodinaID(e.target.value)}
                         obrisiRed={obrisiRed}
                         setPlanovi={setPlanovi}
-                        isAdmin={user.uloga === "ADMINISTRATOR"}
-                        setUser={setUser}          // PROSLEĐENO
-                        setShowLogin={setShowLogin} // PROSLEĐENO
+                        isAdmin={user.uloga === "Administrator"}
+                        setUser={setUser}  
+                        setShowLogin={setShowLogin} 
                     />
                 </>
             )}

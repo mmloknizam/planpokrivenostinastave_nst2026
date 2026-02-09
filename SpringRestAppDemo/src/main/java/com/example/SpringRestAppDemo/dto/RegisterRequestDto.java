@@ -20,6 +20,7 @@ public class RegisterRequestDto {
     private String email;
     private String lozinka;
     private Long ulogaID;
+    private String adminSifra;
 
     public String getEmail() { 
         return email; 
@@ -40,5 +41,13 @@ public class RegisterRequestDto {
     }
     public void setUlogaID(Long ulogaID) { 
         this.ulogaID = ulogaID; 
+    }
+
+    public String getAdminSifra() {
+        return adminSifra;
+    }
+
+    public void setAdminSifra(String adminSifra) {
+        this.adminSifra = adminSifra;
     }
 }
