@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import PlanPokrivenostiNastaveForm from "./PlanPokrivenostiNastaveForm";
 import PokrivenostNastaveForm from "./PokrivenostNastaveForm";
 import DetaljiPokrivenostiModal from "./DetaljiPokrivenostiModal";
@@ -52,8 +52,7 @@ const AdminForm = ({
 
   return (
     <div className="layout-container">
-
-      {/* Sidebar */}
+      {/* SIDEBAR */}
       <div className={`sidebar ${sidebarOpen ? "open" : "closed"}`}>
         <button className="toggle-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
           ☰
@@ -66,20 +65,17 @@ const AdminForm = ({
             <button onClick={() => setView("profil")}>Profil</button>
             <button onClick={() => setView("plan")}>Plan pokrivenosti</button>
 
-            {isAdmin && (
-              <>
-                <button onClick={() => setView("nastavnici")}>Nastavnici</button>
-                <button onClick={() => setView("predmeti")}>Predmeti</button>
-                <button onClick={() => setView("kreiraj")}>Kreiraj plan</button>
-              </>
-            )}
+            <button onClick={() => setView("nastavnici")}>Nastavnici</button>
+            <button onClick={() => setView("predmeti")}>Predmeti</button>
+
+            {/* Samo admin vidi kreiranje plana */}
+            {isAdmin && <button onClick={() => setView("kreiraj")}>Kreiraj plan</button>}
           </div>
         )}
       </div>
 
       {/* GLAVNI SADRŽAJ */}
       <div className="content">
-
         {view === "profil" && (
           <KorisnickiProfil
             korisnickiProfilID={korisnickiProfilID}
@@ -110,8 +106,9 @@ const AdminForm = ({
           />
         )}
 
-        {view === "nastavnici" && isAdmin && <Nastavnici />}
-        {view === "predmeti" && isAdmin && <Predmeti />}
+        {/* Prosleđujemo isAdmin da bi dugmici i kolona uloga radili */}
+        {view === "nastavnici" && <Nastavnici isAdmin={isAdmin} />}
+        {view === "predmeti" && <Predmeti isAdmin={isAdmin} />}
 
         {showDetalji && (
           <DetaljiPokrivenostiModal
@@ -121,7 +118,6 @@ const AdminForm = ({
             onSave={fetchPlanovi}
           />
         )}
-
       </div>
     </div>
   );

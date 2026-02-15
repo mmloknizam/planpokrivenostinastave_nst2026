@@ -3,6 +3,7 @@
 * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
 */
 package com.example.SpringRestAppDemo.controller;
+import com.example.SpringRestAppDemo.dto.DodajPredmetDto;
 import com.example.SpringRestAppDemo.entity.Nastavnik;
 import com.example.SpringRestAppDemo.entity.Predmet;
 import com.example.SpringRestAppDemo.repository.PredmetRepository;
@@ -34,5 +35,22 @@ public class PredmetController {
     @GetMapping("/{predmetID}/nastavnici")
     public List<Nastavnik> getNastavnici(@PathVariable Long predmetID) {
         return npService.nastavniciPredmeta(predmetID);
+    }
+    
+    @PostMapping
+    public Predmet dodajPredmet(@RequestBody DodajPredmetDto dto) {        if (dto.getNaziv() == null || dto.getNaziv().isEmpty() ||
+            dto.getBrojEspb() == null || dto.getFondPredavanja() == null ||
+            dto.getFondVezbi() == null || dto.getFondLabVezbi() == null) {
+            throw new RuntimeException("Sva polja su obavezna!");
+        }
+
+        Predmet predmet = new Predmet();
+        predmet.setNaziv(dto.getNaziv());
+        predmet.setBrojEspb(dto.getBrojEspb());
+        predmet.setFondPredavanja(dto.getFondPredavanja());
+        predmet.setFondVezbi(dto.getFondVezbi());
+        predmet.setFondLabVezbi(dto.getFondLabVezbi());
+
+        return predmetRepository.save(predmet);
     }
 }

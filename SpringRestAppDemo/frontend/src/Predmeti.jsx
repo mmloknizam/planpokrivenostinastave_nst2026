@@ -1,42 +1,59 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import DodajPredmet from "./DodajPredmet";
 
-function Predmeti() {
+function Predmeti({ isAdmin }) {
   const [predmeti, setPredmeti] = useState([]);
-  const [nastavnici, setNastavnici] = useState({}); // mapa {predmetID: [nastavnici]}
+  const [nastavnici, setNastavnici] = useState({});
+  const [showModal, setShowModal] = useState(false);
+
+  const fetchPredmeti = async () => {
+    try {
+      const response = await axios.get("/api/predmet");
+      const data = Array.isArray(response.data) ? response.data : [];
+      setPredmeti(data);
+
+      data.forEach(p => getNastavnici(p.predmetID));
+    } catch (error) {
+      console.error("Greška pri učitavanju predmeta:", error);
+    }
+  };
 
   useEffect(() => {
-    const getPredmeti = async () => {
-      try {
-        const response = await axios.get("/api/predmet");
-        const data = Array.isArray(response.data) ? response.data : [];
-        setPredmeti(data);
-
-        // učitaj nastavnike za svaki predmet
-        data.forEach(p => getNastavnici(p.predmetID));
-      } catch (error) {
-        console.error("Greška pri učitavanju predmeta:", error);
-      }
-    };
-
-    const getNastavnici = async (predmetID) => {
-      try {
-        const response = await axios.get(`/api/predmet/${predmetID}/nastavnici`);
-        const nastavniciData = Array.isArray(response.data) ? response.data : [];
-        setNastavnici(prev => ({ ...prev, [predmetID]: nastavniciData }));
-      } catch (error) {
-        console.error(`Greška pri učitavanju nastavnika za predmet ${predmetID}:`, error);
-        setNastavnici(prev => ({ ...prev, [predmetID]: [] }));
-      }
-    };
-
-    getPredmeti();
+    fetchPredmeti();
   }, []);
+
+  const getNastavnici = async (predmetID) => {
+    try {
+      const response = await axios.get(`/api/predmet/${predmetID}/nastavnici`);
+      const nastavniciData = Array.isArray(response.data) ? response.data : [];
+      setNastavnici(prev => ({ ...prev, [predmetID]: nastavniciData }));
+    } catch (error) {
+      console.error(`Greška pri učitavanju nastavnika za predmet ${predmetID}:`, error);
+      setNastavnici(prev => ({ ...prev, [predmetID]: [] }));
+    }
+  };
 
   return (
     <div>
-      <h2>Lista predmeta</h2>
-      <table border="1">
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+        <h2>Lista predmeta</h2>
+
+        {isAdmin && (
+          <div>
+            <button style={{ marginRight: "10px" }} onClick={() => setShowModal(true)}>
+              Dodaj predmet
+            </button>
+            <button onClick={() => alert("Ova funkcionalnost će biti dodata kasnije")}>
+              Dodaj nastavnika
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Tabela */}
+      <table border="1" cellPadding="5" cellSpacing="0" style={{ width: "100%" }}>
         <thead>
           <tr>
             <th>ID</th>
@@ -45,7 +62,6 @@ function Predmeti() {
             <th>Fond predavanja</th>
             <th>Fond vežbi</th>
             <th>Fond laboratorijskih vežbi</th>
-            <th>Aktivan</th>
             <th>Nastavnici</th>
           </tr>
         </thead>
@@ -58,18 +74,25 @@ function Predmeti() {
               <td>{p.fondPredavanja}</td>
               <td>{p.fondVezbi}</td>
               <td>{p.fondLabVezbi}</td>
-              <td>{p.aktivan ? "Da" : "Ne"}</td>
               <td>
-                {nastavnici[p.predmetID]
+                {nastavnici[p.predmetID] && nastavnici[p.predmetID].length > 0
                   ? nastavnici[p.predmetID].map(n => `${n.ime} ${n.prezime}`).join(", ")
-                  : "Učitavanje..."}
+                  : ""}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {isAdmin && showModal && (
+        <DodajPredmet
+          onClose={() => setShowModal(false)}
+          onSaved={fetchPredmeti}
+        />
+      )}
     </div>
   );
 }
 
 export default Predmeti;
+

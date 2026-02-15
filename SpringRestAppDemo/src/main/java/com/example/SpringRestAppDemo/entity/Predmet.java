@@ -6,6 +6,8 @@ package com.example.SpringRestAppDemo.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -18,6 +20,7 @@ import jakarta.persistence.Table;
 public class Predmet {
     @Id
     @Column(name = "predmetID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long predmetID;
     @Column(name = "naziv")
     private String naziv;
@@ -29,20 +32,17 @@ public class Predmet {
     private int fondVezbi;
     @Column(name = "fondLabVezbi")
     private int fondLabVezbi;
-    @Column(name = "aktivan")
-    private boolean aktivan;
 
     public Predmet() {
     }
 
-    public Predmet(Long predmetID, String naziv, int brojEspb, int fondPredavanja, int fondVezbi, int fondLabVezbi, boolean aktivan) {
+    public Predmet(Long predmetID, String naziv, int brojEspb, int fondPredavanja, int fondVezbi, int fondLabVezbi) {
         this.predmetID = predmetID;
         this.naziv = naziv;
         this.brojEspb = brojEspb;
         this.fondPredavanja = fondPredavanja;
         this.fondVezbi = fondVezbi;
         this.fondLabVezbi = fondLabVezbi;
-        this.aktivan = aktivan;
     }
     
     public Long getPredmetID() {
@@ -69,10 +69,9 @@ public class Predmet {
         this.brojEspb = brojEspb;
     }
 
-    
     @Override
     public String toString() {
-        return "Predmet{" + "predmetID=" + predmetID + ", naziv=" + naziv + ", brojEspb=" + brojEspb + ", fondPredavanja=" + fondPredavanja + ", fondVezbi=" + fondVezbi + ", fondLabVezbi=" + fondLabVezbi + ", aktivan=" + aktivan + '}';
+        return "Predmet{" + "predmetID=" + predmetID + ", naziv=" + naziv + ", brojEspb=" + brojEspb + ", fondPredavanja=" + fondPredavanja + ", fondVezbi=" + fondVezbi + ", fondLabVezbi=" + fondLabVezbi + '}';
     }
 
     public int getFondPredavanja() {
@@ -98,13 +97,4 @@ public class Predmet {
     public void setFondLabVezbi(int fondLabVezbi) {
         this.fondLabVezbi = fondLabVezbi;
     }
-
-    public boolean isAktivan() {
-        return aktivan;
-    }
-
-    public void setAktivan(boolean aktivan) {
-        this.aktivan = aktivan;
-    }
-
 }

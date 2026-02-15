@@ -20,7 +20,6 @@ const DodajNastavnikaNaPredmetModal = ({
   const [sati, setSati] = useState("");
 
   useEffect(() => {
-    // Ucitaj sve nastavnike za predmet
     axios.get(`/api/nastavnik/predmet/${predmetID}`)
          .then(res => setNastavnici(res.data))
          .catch(err => console.error(err));
