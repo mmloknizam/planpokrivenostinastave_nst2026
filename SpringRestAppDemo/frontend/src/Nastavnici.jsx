@@ -69,5 +69,3 @@ function Nastavnici() {
 export default Nastavnici;
 
 
-
-

@@ -2,15 +2,27 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import DodajNastavnikaNaPredmetModal from "./DodajNastavnikaNaPredmetModal";
 
+const LIMITI = {
+  Predavanja: 60,
+  Vezbe: 60,
+  "Laboratorijske vezbe": 30
+};
+
+const SORT_ORDER = {
+  "Predavanja": 1,
+  "Vezbe": 2,
+  "Laboratorijske vezbe": 3
+};
+
 const DetaljiPokrivenostiModal = ({ detalji, setDetalji, onClose, onSave }) => {
   const [sviNastavnici, setSviNastavnici] = useState([]);
   const [obliciNastave, setObliciNastave] = useState([]);
   const [showDodajModal, setShowDodajModal] = useState(false);
 
-  const LIMITI = {
-    Predavanja: 60,
-    Vezbe: 60,
-    "Laboratorijske vezbe": 30
+  const sortirajDetalje = (lista) => {
+    return [...lista].sort(
+      (a, b) => SORT_ORDER[a.oblikNastave.tip] - SORT_ORDER[b.oblikNastave.tip]
+    );
   };
 
   useEffect(() => {
@@ -19,11 +31,12 @@ const DetaljiPokrivenostiModal = ({ detalji, setDetalji, onClose, onSave }) => {
     const predmetID = detalji[0].predmet.predmetID;
 
     axios.get(`/api/nastavnik/predmet/${predmetID}`)
-         .then(res => setSviNastavnici(res.data));
+         .then(res => setSviNastavnici(res.data))
+         .catch(err => console.error(err));
 
     axios.get("/api/obliknastave")
-         .then(res => setObliciNastave(res.data));
-
+         .then(res => setObliciNastave(res.data))
+         .catch(err => console.error(err));
   }, [detalji]);
 
   if (!detalji) return null;
@@ -43,58 +56,45 @@ const DetaljiPokrivenostiModal = ({ detalji, setDetalji, onClose, onSave }) => {
       return;
     }
 
-    setDetalji(
+    setDetalji(sortirajDetalje(
       detalji.map(d =>
         d.pokrivenostNastaveID === id
           ? { ...d, brojSatiNastave: broj }
           : d
       )
-    );
+    ));
   };
 
   const handleChangeNastavnik = (id, noviNastavnik) => {
-    setDetalji(
+    setDetalji(sortirajDetalje(
       detalji.map(d =>
         d.pokrivenostNastaveID === id
           ? { ...d, nastavnik: noviNastavnik }
           : d
       )
-    );
+    ));
   };
 
-  /*const sacuvaj = async row => {
+  const sacuvaj = async row => {
     try {
-      await axios.post("/api/pokrivenostnastave/detalji", row);
+      if (row.pokrivenostNastaveID) {
+        await axios.put(`/api/pokrivenostnastave/detalji/${row.pokrivenostNastaveID}`, row);
+      } else {
+        await axios.post("/api/pokrivenostnastave/detalji", row);
+      }
       onSave?.();
       alert("Izmene sačuvane!");
-    } catch {
-      alert("Greška pri čuvanju");
+    } catch (e) {
+      alert("Greška pri čuvanju: " + (e.response?.data?.message || e.message));
     }
-  };*/
-    
-    const sacuvaj = async row => {
-  try {
-    if (row.pokrivenostNastaveID) {
-      // Update postojeći red
-      await axios.put(`/api/pokrivenostnastave/detalji/${row.pokrivenostNastaveID}`, row);
-    } else {
-      // Novi red
-      await axios.post("/api/pokrivenostnastave/detalji", row);
-    }
-    onSave?.();
-    alert("Izmene sačuvane!");
-  } catch (e) {
-    alert("Greška pri čuvanju: " + e.response?.data?.message || e.message);
-  }
-};
-
+  };
 
   const obrisiJednog = async id => {
     if (!window.confirm("Obrisati?")) return;
 
     try {
       await axios.delete(`/api/pokrivenostnastave/${id}`);
-      setDetalji(detalji.filter(d => d.pokrivenostNastaveID !== id));
+      setDetalji(sortirajDetalje(detalji.filter(d => d.pokrivenostNastaveID !== id)));
       onSave?.();
     } catch {
       alert("Greška pri brisanju");
@@ -113,7 +113,6 @@ const DetaljiPokrivenostiModal = ({ detalji, setDetalji, onClose, onSave }) => {
           <b>Laboratorijske:</b> {sumByOblik("Laboratorijske vezbe")} / 30h
         </div>
 
-        {/* Dugme za novi modal */}
         <button onClick={() => setShowDodajModal(true)}>
           + Dodaj nastavnika na predmet
         </button>
@@ -127,7 +126,6 @@ const DetaljiPokrivenostiModal = ({ detalji, setDetalji, onClose, onSave }) => {
               <th>Akcije</th>
             </tr>
           </thead>
-
           <tbody>
             {detalji.map(d => (
               <tr key={d.pokrivenostNastaveID}>
@@ -177,15 +175,14 @@ const DetaljiPokrivenostiModal = ({ detalji, setDetalji, onClose, onSave }) => {
           <button onClick={onClose}>Zatvori</button>
         </div>
 
-        {/* MODAL ZA DODAVANJE */}
         {showDodajModal && (
           <DodajNastavnikaNaPredmetModal
             predmetID={detalji[0].predmet.predmetID}
             obliciNastave={obliciNastave}
-               postojeciDetalji={detalji} 
+            postojeciDetalji={detalji}
             onClose={() => setShowDodajModal(false)}
             onAdded={novi => {
-              setDetalji([...detalji, novi]);
+              setDetalji(sortirajDetalje([...detalji, novi]));
               onSave?.();
             }}
           />

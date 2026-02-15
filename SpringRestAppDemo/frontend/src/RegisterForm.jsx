@@ -2,12 +2,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 function RegisterForm({ onBackToLogin }) {
+  const DEFAULT_ULOGA_ID = 2;
+
   const [email, setEmail] = useState("");
   const [lozinka, setLozinka] = useState("");
   const [potvrdaLozinke, setPotvrdaLozinke] = useState("");
-
-  const [ulogaID, setUlogaID] = useState("");
-  const [uloge, setUloge] = useState([]);
 
   const [nastavnikID, setNastavnikID] = useState("");
   const [nastavnici, setNastavnici] = useState([]);
@@ -17,14 +16,12 @@ function RegisterForm({ onBackToLogin }) {
   const [poruka, setPoruka] = useState("");
   const [greska, setGreska] = useState("");
   const [greskeLozinke, setGreskeLozinke] = useState([]);
-  const [adminGreska, setAdminGreska] = useState("");
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
 
   const [kod, setKod] = useState("");
-  const [adminSifra, setAdminSifra] = useState(""); // šifra za administratora
 
   const loadSlobodniNastavnici = () => {
     axios
@@ -37,14 +34,6 @@ function RegisterForm({ onBackToLogin }) {
   };
 
   useEffect(() => {
-    axios
-      .get("/api/uloga")
-      .then((res) => setUloge(res.data))
-      .catch(() => {
-        setGreska("Nije moguće učitati uloge.");
-        setShowErrorModal(true);
-      });
-
     loadSlobodniNastavnici();
   }, []);
 
@@ -69,7 +58,6 @@ function RegisterForm({ onBackToLogin }) {
     e.preventDefault();
     setGreska("");
     setPoruka("");
-    setAdminGreska("");
 
     if (!nastavnikID) {
       setGreska("Morate izabrati nastavnika.");
@@ -97,33 +85,18 @@ function RegisterForm({ onBackToLogin }) {
       return;
     }
 
-    if (!ulogaID) {
-      setGreska("Izaberite ulogu.");
-      setShowErrorModal(true);
-      return;
-    }
-
-    // Provera šifre za administratora
-    if (uloge.find((u) => String(u.ulogaID) === String(ulogaID))?.tip === "Administrator") {
-      if (adminSifra !== "AdminFon") {
-        setAdminGreska("Pogrešna šifra za registraciju kao Administrator!");
-        return;
-      }
-    }
-
     try {
       setLoading(true);
+
       const res = await axios.post("/api/auth/register", {
         email,
         lozinka,
-        ulogaID,
-        nastavnikID,
-        adminSifra // <--- šaljemo backend-u
+        ulogaID: DEFAULT_ULOGA_ID, // 👈 OVDE šaljemo ulogu
+        nastavnikID
       });
 
       setPoruka(res.data.message || "Uspešna registracija!");
       setShowVerification(true);
-      setAdminSifra("");
     } catch (err) {
       setGreska(err.response?.data || "Greška pri registraciji.");
       setShowErrorModal(true);
@@ -141,11 +114,12 @@ function RegisterForm({ onBackToLogin }) {
 
     try {
       setLoading(true);
+
       const res = await axios.post("/api/auth/confirm", {
         email,
         kod,
         lozinka,
-        ulogaID,
+        ulogaID: DEFAULT_ULOGA_ID, // 👈 I ovde
         nastavnikID
       });
 
@@ -155,10 +129,9 @@ function RegisterForm({ onBackToLogin }) {
       setEmail("");
       setLozinka("");
       setPotvrdaLozinke("");
-      setUlogaID("");
       setNastavnikID("");
       setKod("");
-      setAdminSifra("");
+
       loadSlobodniNastavnici();
     } catch (err) {
       setGreska(err.response?.data || "Greška pri potvrdi koda.");
@@ -193,11 +166,8 @@ function RegisterForm({ onBackToLogin }) {
     setEmail("");
     setLozinka("");
     setPotvrdaLozinke("");
-    setUlogaID("");
     setNastavnikID("");
     setKod("");
-    setAdminSifra("");
-    setAdminGreska("");
     setShowVerification(false);
 
     loadSlobodniNastavnici();
@@ -247,37 +217,6 @@ function RegisterForm({ onBackToLogin }) {
             required
             onChange={(e) => setPotvrdaLozinke(e.target.value)}
           />
-
-          <select
-            value={ulogaID}
-            onChange={(e) => {
-              setUlogaID(e.target.value);
-              setAdminGreska("");
-              setAdminSifra("");
-            }}
-            required
-          >
-            <option value="">-- Izaberite ulogu --</option>
-            {uloge.map((u) => (
-              <option key={u.ulogaID} value={u.ulogaID}>
-                {u.tip}
-              </option>
-            ))}
-          </select>
-
-          {/* Polje za šifru ako je Administrator */}
-          {uloge.find((u) => String(u.ulogaID) === String(ulogaID))?.tip === "Administrator" && (
-            <>
-              <input
-                type="password"
-                placeholder="Unesite šifru za administratora"
-                value={adminSifra}
-                onChange={(e) => setAdminSifra(e.target.value)}
-                required
-              />
-              {adminGreska && <p style={{ color: "red" }}>{adminGreska}</p>}
-            </>
-          )}
 
           <button disabled={loading || !nastavnikID}>
             {loading ? "Registrujem..." : "Registruj se"}

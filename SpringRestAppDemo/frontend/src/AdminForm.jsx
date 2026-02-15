@@ -6,9 +6,10 @@ import Nastavnici from "./Nastavnici";
 import Predmeti from "./Predmeti";
 import KorisnickiProfil from "./KorisnickiProfil";
 import axios from "axios";
+import "./Sidebar.css";
 
 const AdminForm = ({
-  korisnickiProfilID, 
+  korisnickiProfilID,
   planovi,
   skolskeGodine,
   selectedGodinaID,
@@ -16,19 +17,14 @@ const AdminForm = ({
   obrisiRed,
   setPlanovi,
   isAdmin,
-  setUser,         
-  setShowLogin    
+  setUser,
+  setShowLogin,
 }) => {
   const [view, setView] = useState("plan");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
   const [showDetalji, setShowDetalji] = useState(false);
   const [detalji, setDetalji] = useState([]);
-
-  useEffect(() => {
-    if (view !== "plan") {
-      onGodinaChange({ target: { value: "" } });
-      setPlanovi([]);
-    }
-  }, [view]);
 
   const handleDetalji = async (predmetID) => {
     try {
@@ -37,8 +33,7 @@ const AdminForm = ({
       );
       setDetalji(res.data);
       setShowDetalji(true);
-    } catch (err) {
-      console.error(err);
+    } catch {
       alert("Greška pri učitavanju detalja!");
     }
   };
@@ -50,72 +45,84 @@ const AdminForm = ({
         `/api/pokrivenostnastave/plan/${selectedGodinaID}`
       );
       setPlanovi(res.data);
-    } catch (err) {
-      console.error(err);
+    } catch {
       alert("Greška prilikom osvežavanja plana!");
     }
   };
 
   return (
-    <div>
-      <h2>{isAdmin ? "Admin panel" : "Korisnički panel"}</h2>
+    <div className="layout-container">
 
-      <div style={{ marginBottom: "15px" }}>
-        <button onClick={() => setView("profil")}>Profil korisnika</button>
-        <button onClick={() => setView("plan")} style={{ marginLeft: "10px" }}>Prikaz plana</button>
-        <button onClick={() => setView("nastavnici")} style={{ marginLeft: "10px" }}>Nastavnici</button>
-        <button onClick={() => setView("predmeti")} style={{ marginLeft: "10px" }}>Predmeti</button>
-        {isAdmin && <button onClick={() => setView("kreiraj")} style={{ marginLeft: "10px" }}>Kreiraj plan</button>}
+      {/* Sidebar */}
+      <div className={`sidebar ${sidebarOpen ? "open" : "closed"}`}>
+        <button className="toggle-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
+          ☰
+        </button>
+
+        {sidebarOpen && (
+          <div className="menu-items">
+            <h3>{isAdmin ? "Admin meni" : "Korisnički meni"}</h3>
+
+            <button onClick={() => setView("profil")}>Profil</button>
+            <button onClick={() => setView("plan")}>Plan pokrivenosti</button>
+
+            {isAdmin && (
+              <>
+                <button onClick={() => setView("nastavnici")}>Nastavnici</button>
+                <button onClick={() => setView("predmeti")}>Predmeti</button>
+                <button onClick={() => setView("kreiraj")}>Kreiraj plan</button>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
-      <hr />
+      {/* GLAVNI SADRŽAJ */}
+      <div className="content">
 
-      {view === "profil" && korisnickiProfilID && (
-        <KorisnickiProfil
-          korisnickiProfilID={korisnickiProfilID}
-          setUser={(prev) =>
-            setUser({
-              ...prev,
-              // ovde se mogu osvežiti podaci koji dođu sa backend-a
-            })
-          }
-          setShowLogin={setShowLogin}
-        />
-      )}
+        {view === "profil" && (
+          <KorisnickiProfil
+            korisnickiProfilID={korisnickiProfilID}
+            setUser={setUser}
+            setShowLogin={setShowLogin}
+          />
+        )}
 
-      {view === "plan" && (
-        <PlanPokrivenostiNastaveForm
-          planovi={planovi}
-          skolskeGodine={skolskeGodine}
-          selectedGodinaID={selectedGodinaID}
-          onGodinaChange={onGodinaChange}
-          obrisiRed={obrisiRed}
-          isAdmin={isAdmin}
-          onDetalji={handleDetalji}
-        />
-      )}
+        {view === "plan" && (
+          <PlanPokrivenostiNastaveForm
+            planovi={planovi}
+            skolskeGodine={skolskeGodine}
+            selectedGodinaID={selectedGodinaID}
+            onGodinaChange={onGodinaChange}
+            obrisiRed={obrisiRed}
+            isAdmin={isAdmin}
+            onDetalji={handleDetalji}
+          />
+        )}
 
-      {view === "kreiraj" && isAdmin && (
-        <PokrivenostNastaveForm
-          onCancel={() => setView("plan")}
-          onSuccess={async () => {
-            await fetchPlanovi();
-            setView("plan");
-          }}
-        />
-      )}
+        {view === "kreiraj" && isAdmin && (
+          <PokrivenostNastaveForm
+            onCancel={() => setView("plan")}
+            onSuccess={async () => {
+              await fetchPlanovi();
+              setView("plan");
+            }}
+          />
+        )}
 
-      {view === "nastavnici" && <Nastavnici />}
-      {view === "predmeti" && <Predmeti />}
+        {view === "nastavnici" && isAdmin && <Nastavnici />}
+        {view === "predmeti" && isAdmin && <Predmeti />}
 
-      {showDetalji && (
-        <DetaljiPokrivenostiModal
-          detalji={detalji}
-          setDetalji={setDetalji}
-          onClose={() => setShowDetalji(false)}
-          onSave={fetchPlanovi}
-        />
-      )}
+        {showDetalji && (
+          <DetaljiPokrivenostiModal
+            detalji={detalji}
+            setDetalji={setDetalji}
+            onClose={() => setShowDetalji(false)}
+            onSave={fetchPlanovi}
+          />
+        )}
+
+      </div>
     </div>
   );
 };
