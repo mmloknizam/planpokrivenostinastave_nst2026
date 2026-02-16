@@ -23,9 +23,9 @@ function DodajPredmet({ onClose, onSaved }) {
         fondLabVezbi
       });
 
-      alert("Predmet je uspešno dodat!"); // poruka o uspehu
-      onSaved(); // osveži listu predmeta u parent komponenti
-      onClose(); // zatvori modal
+      alert("Predmet je uspešno dodat!");
+      onSaved();
+      onClose();
     } catch (err) {
       console.error("Greška pri dodavanju predmeta:", err);
       alert("Greška pri dodavanju predmeta!");
@@ -75,9 +75,10 @@ function DodajPredmet({ onClose, onSaved }) {
           <input type="number" value={fondLabVezbi} onChange={(e) => setFondLabVezbi(e.target.value)} />
         </div>
 
-        <div style={{ textAlign: "right" }}>
+        <div style={{ textAlign: "right" }}> 
+          <button onClick={handleSave}>Dodaj</button>
           <button onClick={onClose} style={{ marginRight: "10px" }}>Otkaži</button>
-          <button onClick={handleSave}>Sačuvaj</button>
+
         </div>
       </div>
     </div>

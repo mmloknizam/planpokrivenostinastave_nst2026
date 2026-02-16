@@ -69,7 +69,44 @@ public class NastavnikPredmetServiceImpl implements NastavnikPredmetService {
         NastavnikPredmet np = new NastavnikPredmet(predmet, nastavnik);
         return npRepository.save(np);
     }
+    
+    @Override
+    public void obrisiPredmetZaNastavnika(Long nastavnikID, Long predmetID) {
+        NastavnikPredmet np = npRepository
+            .findByNastavnik_NastavnikIDAndPredmet_PredmetID(nastavnikID, predmetID)
+            .orElseThrow(() -> new RuntimeException("Veza ne postoji!"));
 
+        npRepository.delete(np);
+    }
+
+    @Override
+    public void obrisiNastavnika(Long nastavnikID) {
+        Nastavnik nastavnik = nastavnikRepository.findById(nastavnikID)
+            .orElseThrow(() -> new RuntimeException("Nastavnik ne postoji!"));
+
+        npRepository.deleteAllByNastavnik_NastavnikID(nastavnikID);
+
+        nastavnikRepository.delete(nastavnik);
+    }
+
+    @Override
+    public void obrisiPredmet(Long predmetID) {
+        Predmet predmet = predmetRepository.findById(predmetID)
+                .orElseThrow(() -> new RuntimeException("Predmet ne postoji!"));
+
+        npRepository.deleteAllByPredmet_PredmetID(predmetID);
+
+        predmetRepository.delete(predmet);
+    }
+
+    @Override
+    public void obrisiNastavnikaZaPredmet(Long nastavnikID, Long predmetID) {
+        NastavnikPredmet np = npRepository
+                .findByNastavnik_NastavnikIDAndPredmet_PredmetID(nastavnikID, predmetID)
+                .orElseThrow(() -> new RuntimeException("Veza ne postoji!"));
+
+        npRepository.delete(np);
+    }
 }
 
 

@@ -5,7 +5,9 @@
 package com.example.SpringRestAppDemo.controller;
  
 import com.example.SpringRestAppDemo.dto.DodajNastavnikaDto;
+import com.example.SpringRestAppDemo.dto.NastavnikPredmetDto;
 import com.example.SpringRestAppDemo.entity.Nastavnik;
+import com.example.SpringRestAppDemo.entity.NastavnikPredmet;
 import com.example.SpringRestAppDemo.entity.Predmet;
 import com.example.SpringRestAppDemo.entity.Zvanje;
 import com.example.SpringRestAppDemo.repository.NastavnikRepository;
@@ -88,5 +90,20 @@ public class NastavnikController {
 
         return nastavnikRepository.save(nastavnik);
     }
+    
+    @PostMapping("/predmet")
+    public NastavnikPredmet dodajPredmetNastavniku(@RequestBody NastavnikPredmetDto dto) {
+        return npService.dodaj(dto.getNastavnikID(), dto.getPredmetID());
+    }
 
+    @DeleteMapping("/nastavnici/{nastavnikId}")
+    public void obrisiNastavnika(@PathVariable Long nastavnikId) {
+        npService.obrisiNastavnika(nastavnikId);
+    }
+
+    @DeleteMapping("/nastavnici/{nastavnikId}/predmeti/{predmetId}")
+    public void obrisiPredmetZaNastavnika(@PathVariable Long nastavnikId,
+                                          @PathVariable Long predmetId) {
+        npService.obrisiPredmetZaNastavnika(nastavnikId, predmetId);
+    }
 }

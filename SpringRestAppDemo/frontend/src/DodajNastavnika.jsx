@@ -32,9 +32,9 @@ function DodajNastavnika({ onClose, onSaved }) {
         zvanjeID: parseInt(selectedZvanje)
       });
 
-      alert("Nastavnik je uspešno dodat!"); // poruka o uspehu
-      onSaved(); // osveži listu nastavnika
-      onClose(); // zatvori modal
+      alert("Nastavnik je uspešno dodat!");
+      onSaved();
+      onClose();
     } catch (err) {
       console.error("Greška pri dodavanju nastavnika:", err.response || err);
       alert(err.response?.data?.message || "Greška pri dodavanju nastavnika!");
@@ -76,8 +76,8 @@ function DodajNastavnika({ onClose, onSaved }) {
           </select>
         </div>
         <div style={{ textAlign: "right" }}>
+          <button onClick={handleSave}>Dodaj</button>
           <button onClick={onClose} style={{ marginRight: "10px" }}>Otkaži</button>
-          <button onClick={handleSave}>Sačuvaj</button>
         </div>
       </div>
     </div>

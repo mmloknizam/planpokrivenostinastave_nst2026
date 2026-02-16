@@ -21,4 +21,8 @@ public interface NastavnikPredmetRepository extends JpaRepository<NastavnikPredm
     List<NastavnikPredmet> findByNastavnik_NastavnikID(Long nastavnikID);
     Optional<NastavnikPredmet> findByNastavnik_NastavnikIDAndPredmet_PredmetID(Long nastavnikID, Long predmetID);
 
+    public void deleteAllByNastavnik_NastavnikID(Long nastavnikID);
+
+    public void deleteAllByPredmet_PredmetID(Long predmetID);
+
 }

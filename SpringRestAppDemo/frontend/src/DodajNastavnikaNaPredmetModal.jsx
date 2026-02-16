@@ -26,7 +26,6 @@ const DodajNastavnikaNaPredmetModal = ({
   }, [predmetID]);
 
   const izracunajZauzece = (oblikID) => {
-    // Suma sati postojećih redova za taj oblik
     return postojeciDetalji
             .filter(d => d.oblikNastave.oblikNastaveID == oblikID)
             .reduce((sum, d) => sum + (d.brojSatiNastave || 0), 0);
@@ -51,7 +50,6 @@ const DodajNastavnikaNaPredmetModal = ({
       );
     }
 
-    // Payload za /detalji endpoint
     const payload = {
        brojSatiNastave: Number(sati),
         predmet: { predmetID },
