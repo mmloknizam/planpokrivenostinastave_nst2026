@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import PlanPokrivenostiNastaveForm from "./PlanPokrivenostiNastaveForm";
-import PokrivenostNastaveForm from "./PokrivenostNastaveForm";
+import KreirajPlanForm from "./KreirajPlanForm";
 import DetaljiPokrivenostiModal from "./DetaljiPokrivenostiModal";
 import Nastavnici from "./Nastavnici";
 import Predmeti from "./Predmeti";
@@ -68,13 +68,11 @@ const AdminForm = ({
             <button onClick={() => setView("nastavnici")}>Nastavnici</button>
             <button onClick={() => setView("predmeti")}>Predmeti</button>
 
-            {/* Samo admin vidi kreiranje plana */}
             {isAdmin && <button onClick={() => setView("kreiraj")}>Kreiraj plan</button>}
           </div>
         )}
       </div>
-
-      {/* GLAVNI SADRŽAJ */}
+      
       <div className="content">
         {view === "profil" && (
           <KorisnickiProfil
@@ -96,17 +94,17 @@ const AdminForm = ({
           />
         )}
 
-        {view === "kreiraj" && isAdmin && (
-          <PokrivenostNastaveForm
-            onCancel={() => setView("plan")}
-            onSuccess={async () => {
-              await fetchPlanovi();
-              setView("plan");
-            }}
-          />
+       {view === "kreiraj" && isAdmin && (
+            <KreirajPlanForm
+              skolskeGodine={skolskeGodine}
+              onCancel={() => setView("plan")}
+              onSuccess={async () => {
+                await fetchPlanovi();
+                setView("plan");
+              }}
+            />
         )}
 
-        {/* Prosleđujemo isAdmin da bi dugmici i kolona uloga radili */}
         {view === "nastavnici" && <Nastavnici isAdmin={isAdmin} />}
         {view === "predmeti" && <Predmeti isAdmin={isAdmin} />}
 

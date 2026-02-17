@@ -5,6 +5,7 @@
 package com.example.SpringRestAppDemo.repository;
 
 import com.example.SpringRestAppDemo.entity.PokrivenostNastave;
+import com.example.SpringRestAppDemo.entity.SkolskaGodina;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -33,4 +34,13 @@ public interface PokrivenostNastaveRepository extends JpaRepository<PokrivenostN
                 @Param("skolskaGodinaID") Long skolskaGodinaID,
                 @Param("oblikNastaveID") Long oblikNastaveID);
     
+    
+    @Query("""
+        SELECT DISTINCT p.skolskaGodina
+        FROM PokrivenostNastave p
+        WHERE p.skolskaGodina.godina < :godina
+    """)
+    List<SkolskaGodina> findPrethodneGodine(@Param("godina") String godina);
+
+
 }

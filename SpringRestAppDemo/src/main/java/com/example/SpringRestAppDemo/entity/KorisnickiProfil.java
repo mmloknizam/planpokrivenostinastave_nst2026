@@ -102,4 +102,8 @@ public class KorisnickiProfil {
         this.nastavnik = nastavnik;
     }
 
+    public Object findByNastavnik_NastavnikID(Long id) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
 }

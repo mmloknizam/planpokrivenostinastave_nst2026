@@ -4,12 +4,20 @@
  */
 package com.example.SpringRestAppDemo.service.impl;
 
+import com.example.SpringRestAppDemo.dto.KreirajPlanDto;
 import com.example.SpringRestAppDemo.dto.PlanPokrivenostiNastaveDto;
 import com.example.SpringRestAppDemo.entity.PokrivenostNastave;
 import com.example.SpringRestAppDemo.dto.PokrivenostNastaveDto;
+import com.example.SpringRestAppDemo.entity.NastavnikPredmet;
+import com.example.SpringRestAppDemo.entity.OblikNastave;
+import com.example.SpringRestAppDemo.entity.Predmet;
+import com.example.SpringRestAppDemo.entity.SkolskaGodina;
 import com.example.SpringRestAppDemo.mapper.impl.PokrivenostNastaveDtoEntityMapper;
+import com.example.SpringRestAppDemo.repository.NastavnikPredmetRepository;
 import com.example.SpringRestAppDemo.repository.PokrivenostNastaveRepository;
+import com.example.SpringRestAppDemo.repository.SkolskaGodinaRepository;
 import com.example.SpringRestAppDemo.service.PokrivenostNastaveService;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -22,12 +30,16 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class PokrivenostNastaveServiceImpl implements PokrivenostNastaveService{
-    private PokrivenostNastaveRepository pokrivenostNastaveRepository;
-    private PokrivenostNastaveDtoEntityMapper pokrivenostNastaveDtoEntityMapper;
+    private final PokrivenostNastaveRepository pokrivenostNastaveRepository;
+    private final PokrivenostNastaveDtoEntityMapper pokrivenostNastaveDtoEntityMapper;
+    private final SkolskaGodinaRepository skolskaGodinaRepository;
+    private final NastavnikPredmetRepository nastavnikPredmetRepository;
 
-    public PokrivenostNastaveServiceImpl(PokrivenostNastaveRepository pokrivenostNastaveRepository, PokrivenostNastaveDtoEntityMapper pokrivenostNastaveDtoEntityMapper) {
+    public PokrivenostNastaveServiceImpl(PokrivenostNastaveRepository pokrivenostNastaveRepository, PokrivenostNastaveDtoEntityMapper pokrivenostNastaveDtoEntityMapper, SkolskaGodinaRepository skolskaGodinaRepository, NastavnikPredmetRepository nastavnikPredmetRepository) {
         this.pokrivenostNastaveRepository = pokrivenostNastaveRepository;
         this.pokrivenostNastaveDtoEntityMapper = pokrivenostNastaveDtoEntityMapper;
+        this.skolskaGodinaRepository = skolskaGodinaRepository;
+        this.nastavnikPredmetRepository = nastavnikPredmetRepository;
     }
     
     @Override
@@ -278,4 +290,75 @@ public class PokrivenostNastaveServiceImpl implements PokrivenostNastaveService{
         );
     }
 
+    @Override
+    @Transactional
+    public void kreirajPlan(KreirajPlanDto dto) {
+        Long godinaID = dto.getSkolskaGodinaID();
+        List<PokrivenostNastave> postojeciPlan = pokrivenostNastaveRepository.findAllBySkolskaGodina_SkolskaGodinaID(godinaID);
+
+        if (!postojeciPlan.isEmpty()) {
+
+            throw new RuntimeException("Plan za ovu godinu već postoji!");
+
+        }
+        
+        if (dto.isKopirajPrethodnu()) {
+            SkolskaGodina trenutna = skolskaGodinaRepository.findById(godinaID).orElseThrow(() -> new RuntimeException("Izabrana godina ne postoji"));
+            List<SkolskaGodina> prethodne = pokrivenostNastaveRepository.findPrethodneGodine(trenutna.getGodina());
+ 
+            if (prethodne.isEmpty()) {
+                throw new RuntimeException("Ne postoji prethodna godina za kopiranje!");
+            }
+ 
+            Long prethodnaID = prethodne.get(0).getSkolskaGodinaID();
+            List<PokrivenostNastave> stariPlan = pokrivenostNastaveRepository.findAllBySkolskaGodina_SkolskaGodinaID(prethodnaID);
+ 
+            if (stariPlan.isEmpty()) {
+                throw new RuntimeException("Prethodna godina nema kreiran plan!");
+            }
+            for (PokrivenostNastave pn : stariPlan) {
+                PokrivenostNastave novi = new PokrivenostNastave();
+                novi.setPredmet(pn.getPredmet());
+                novi.setOblikNastave(pn.getOblikNastave());
+                novi.setNastavnik(pn.getNastavnik());
+                novi.setBrojSatiNastave(pn.getBrojSatiNastave());
+                SkolskaGodina novaGodina = new SkolskaGodina();
+                novaGodina.setSkolskaGodinaID(godinaID);
+                novi.setSkolskaGodina(novaGodina);
+                pokrivenostNastaveRepository.save(novi);
+            }
+            return;
+        }
+        if (dto.getPredmetIDs() == null || dto.getPredmetIDs().isEmpty()) {
+            throw new RuntimeException("Morate izabrati predmete za kreiranje novog plana!");
+        }
+ 
+        for (Long predmetID : dto.getPredmetIDs()) {
+            List<NastavnikPredmet> vezani = nastavnikPredmetRepository.findByPredmet_PredmetID(predmetID);
+            int idx = 0;
+            for (Long oblikID : List.of(1L, 2L, 3L)) {
+                PokrivenostNastave pn = new PokrivenostNastave();
+                Predmet p = new Predmet();
+                p.setPredmetID(predmetID);
+                pn.setPredmet(p);
+                SkolskaGodina godina = new SkolskaGodina();
+                godina.setSkolskaGodinaID(godinaID);
+                pn.setSkolskaGodina(godina);
+                OblikNastave oblik = new OblikNastave();
+                oblik.setOblikNastaveID(oblikID);
+                pn.setOblikNastave(oblik);
+                pn.setBrojSatiNastave(0);
+                if (!vezani.isEmpty()) {
+                    var nastavnik = vezani.get(idx % vezani.size()).getNastavnik();
+                    pn.setNastavnik(nastavnik);
+                    idx++;
+                }
+                pokrivenostNastaveRepository.save(pn);
+
+            }
+
+        }
+
+    }
+ 
 }

@@ -5,7 +5,6 @@
 package com.example.SpringRestAppDemo.dto;
 
 
-import com.example.SpringRestAppDemo.entity.Uloga;
 import java.io.Serializable;
 
 /**
@@ -16,17 +15,7 @@ public class KorisnickiProfilDto implements Serializable{
     private Long korisnickiProfilID;
     private String email;
     private String lozinka;
-    private Uloga uloga;
-    
-    public KorisnickiProfilDto() {
-    }
-
-    public KorisnickiProfilDto(Long korisnickiProfilID, String email, String lozinka, Uloga uloga) {
-        this.korisnickiProfilID = korisnickiProfilID;
-        this.email = email;
-        this.lozinka = lozinka;
-        this.uloga = uloga;
-    }
+    private UlogaDto uloga;
 
     public Long getKorisnickiProfilID() {
         return korisnickiProfilID;
@@ -52,11 +41,12 @@ public class KorisnickiProfilDto implements Serializable{
         this.lozinka = lozinka;
     }
 
-    public Uloga getUloga() {
+    public UlogaDto getUloga() {
         return uloga;
     }
 
-    public void setUloga(Uloga uloga) {
+    public void setUloga(UlogaDto uloga) {
         this.uloga = uloga;
     }
+
 }

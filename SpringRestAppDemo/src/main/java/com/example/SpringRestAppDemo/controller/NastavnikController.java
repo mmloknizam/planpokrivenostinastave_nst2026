@@ -5,17 +5,28 @@
 package com.example.SpringRestAppDemo.controller;
  
 import com.example.SpringRestAppDemo.dto.DodajNastavnikaDto;
+import com.example.SpringRestAppDemo.dto.KorisnickiProfilDto;
+import com.example.SpringRestAppDemo.dto.NastavnikDto;
 import com.example.SpringRestAppDemo.dto.NastavnikPredmetDto;
+import com.example.SpringRestAppDemo.dto.PromenaUlogeDto;
+import com.example.SpringRestAppDemo.dto.UlogaDto;
+import com.example.SpringRestAppDemo.dto.ZvanjeDto;
+import com.example.SpringRestAppDemo.entity.KorisnickiProfil;
 import com.example.SpringRestAppDemo.entity.Nastavnik;
 import com.example.SpringRestAppDemo.entity.NastavnikPredmet;
 import com.example.SpringRestAppDemo.entity.Predmet;
+import com.example.SpringRestAppDemo.entity.Uloga;
 import com.example.SpringRestAppDemo.entity.Zvanje;
+import com.example.SpringRestAppDemo.repository.KorisnickiProfilRepository;
 import com.example.SpringRestAppDemo.repository.NastavnikRepository;
+import com.example.SpringRestAppDemo.repository.UlogaRepository;
 import com.example.SpringRestAppDemo.repository.ZvanjeRepository;
 import com.example.SpringRestAppDemo.service.NastavnikPredmetService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 /**
 *
@@ -29,11 +40,15 @@ public class NastavnikController {
     private final NastavnikRepository nastavnikRepository;
     private final NastavnikPredmetService npService;
     private final ZvanjeRepository zvanjeRepository;
+    private final KorisnickiProfilRepository korisnickiProfilRepository;
+    private final UlogaRepository ulogaRepository;
 
-    public NastavnikController(NastavnikRepository nastavnikRepository, NastavnikPredmetService npService, ZvanjeRepository zvanjeRepository) {
+    public NastavnikController(NastavnikRepository nastavnikRepository, NastavnikPredmetService npService, ZvanjeRepository zvanjeRepository, KorisnickiProfilRepository korisnickiProfilRepository, UlogaRepository ulogaRepository) {
         this.nastavnikRepository = nastavnikRepository;
         this.npService = npService;
         this.zvanjeRepository = zvanjeRepository;
+        this.korisnickiProfilRepository = korisnickiProfilRepository;
+        this.ulogaRepository = ulogaRepository;
     }
  
     @GetMapping
@@ -106,4 +121,59 @@ public class NastavnikController {
                                           @PathVariable Long predmetId) {
         npService.obrisiPredmetZaNastavnika(nastavnikId, predmetId);
     }
+    
+    @PutMapping("/{id}/uloga")
+   public ResponseEntity<?> promeniUlogu(
+           @PathVariable Long id,
+           @RequestBody PromenaUlogeDto dto
+   ) {
+       if (!nastavnikRepository.existsById(id)) {
+           return ResponseEntity.badRequest().body("Nastavnik ne postoji!");
+       }
+
+       Optional<KorisnickiProfil> optionalProfil = korisnickiProfilRepository
+               .findByNastavnik_NastavnikID(id);
+
+       if (optionalProfil.isEmpty()) {
+           return ResponseEntity
+                   .badRequest()
+                   .body("Nastavnik nema korisnički profil!");
+       }
+
+       KorisnickiProfil profil = optionalProfil.get();
+
+       Uloga uloga = ulogaRepository.findById(dto.getUlogaID())
+               .orElseThrow(() -> new RuntimeException("Uloga ne postoji!"));
+
+       profil.setUloga(uloga);
+       korisnickiProfilRepository.save(profil);
+
+       return ResponseEntity.ok("Uloga uspešno promenjena!");
+   }
+   
+   @GetMapping("/svi")
+    public List<NastavnikDto> getAll() {
+        return nastavnikRepository.findAll().stream().map(n -> {
+            NastavnikDto dto = new NastavnikDto();
+            dto.setNastavnikID(n.getNastavnikID());
+            dto.setIme(n.getIme());
+            dto.setPrezime(n.getPrezime());
+            dto.setZvanje(new ZvanjeDto(n.getZvanje().getZvanjeID(), n.getZvanje().getNaziv()));
+            if (n.getKorisnickiProfil() != null) {
+                KorisnickiProfilDto kp = new KorisnickiProfilDto();
+                kp.setKorisnickiProfilID(n.getKorisnickiProfil().getKorisnickiProfilID());
+                kp.setEmail(n.getKorisnickiProfil().getEmail());
+                if (n.getKorisnickiProfil().getUloga() != null) {
+                    kp.setUloga(new UlogaDto(
+                        n.getKorisnickiProfil().getUloga().getUlogaID(),
+                        n.getKorisnickiProfil().getUloga().getTip()
+                    ));
+                }
+                dto.setKorisnickiProfil(kp);
+            }
+            return dto;
+        }).toList();
+    }
+
+
 }

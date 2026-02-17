@@ -4,6 +4,7 @@
  */
 package com.example.SpringRestAppDemo.controller;
 
+import com.example.SpringRestAppDemo.dto.KreirajPlanDto;
 import com.example.SpringRestAppDemo.dto.PlanPokrivenostiNastaveDto;
 import com.example.SpringRestAppDemo.dto.PokrivenostNastaveDto;
 import com.example.SpringRestAppDemo.service.PokrivenostNastaveService;
@@ -83,7 +84,13 @@ public class PokrivenostNastaveController {
         @PathVariable Long id,
         @RequestBody PokrivenostNastaveDto dto) {
     return ResponseEntity.ok(pokrivenostNastaveService.updateDetalji(id, dto));
-}
+    }
+    
+    @PostMapping("/plan/kreiraj")
+    public ResponseEntity<Void> kreirajPlan(@RequestBody KreirajPlanDto dto) {
+        pokrivenostNastaveService.kreirajPlan(dto);
+        return ResponseEntity.ok().build();
+    }
     
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<String> handleException(Exception e){

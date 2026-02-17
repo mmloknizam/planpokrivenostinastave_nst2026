@@ -5,6 +5,7 @@
 package com.example.SpringRestAppDemo.repository;
 
 import com.example.SpringRestAppDemo.entity.SkolskaGodina;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,5 +15,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface SkolskaGodinaRepository extends JpaRepository<SkolskaGodina, Long>{
-    
+   public Optional<SkolskaGodina> findById(Long skolskaGodinaID); 
 }

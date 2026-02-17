@@ -4,6 +4,7 @@
  */
 package com.example.SpringRestAppDemo.service;
 
+import com.example.SpringRestAppDemo.dto.KreirajPlanDto;
 import com.example.SpringRestAppDemo.dto.PlanPokrivenostiNastaveDto;
 import com.example.SpringRestAppDemo.dto.PokrivenostNastaveDto;
 import java.util.List;
@@ -22,4 +23,5 @@ public interface PokrivenostNastaveService {
     PokrivenostNastaveDto savePlan(PokrivenostNastaveDto dto) throws Exception;
     PokrivenostNastaveDto saveDetalji(PokrivenostNastaveDto dto);
     PokrivenostNastaveDto updateDetalji(Long id,PokrivenostNastaveDto dto);
+    public void kreirajPlan(KreirajPlanDto dto);
 }
