@@ -19,6 +19,7 @@ const AdminForm = ({
   isAdmin,
   setUser,
   setShowLogin,
+  onObrisiPlan  
 }) => {
   const [view, setView] = useState("plan");
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -68,11 +69,15 @@ const AdminForm = ({
             <button onClick={() => setView("nastavnici")}>Nastavnici</button>
             <button onClick={() => setView("predmeti")}>Predmeti</button>
 
-            {isAdmin && <button onClick={() => setView("kreiraj")}>Kreiraj plan</button>}
+            {isAdmin && (
+              <button onClick={() => setView("kreiraj")}>
+                Kreiraj plan
+              </button>
+            )}
           </div>
         )}
       </div>
-      
+
       <div className="content">
         {view === "profil" && (
           <KorisnickiProfil
@@ -84,25 +89,26 @@ const AdminForm = ({
 
         {view === "plan" && (
           <PlanPokrivenostiNastaveForm
-            planovi={planovi}
-            skolskeGodine={skolskeGodine}
-            selectedGodinaID={selectedGodinaID}
-            onGodinaChange={onGodinaChange}
-            obrisiRed={obrisiRed}
-            isAdmin={isAdmin}
-            onDetalji={handleDetalji}
+                planovi={planovi}
+                skolskeGodine={skolskeGodine}
+                selectedGodinaID={selectedGodinaID}
+                onGodinaChange={onGodinaChange}
+                obrisiRed={obrisiRed}
+                isAdmin={isAdmin}
+                onDetalji={handleDetalji}
+                onObrisiPlan={onObrisiPlan}
           />
         )}
 
-       {view === "kreiraj" && isAdmin && (
-            <KreirajPlanForm
-              skolskeGodine={skolskeGodine}
-              onCancel={() => setView("plan")}
-              onSuccess={async () => {
-                await fetchPlanovi();
-                setView("plan");
-              }}
-            />
+        {view === "kreiraj" && isAdmin && (
+          <KreirajPlanForm
+            skolskeGodine={skolskeGodine}
+            onCancel={() => setView("plan")}
+            onSuccess={async () => {
+              await fetchPlanovi();
+              setView("plan");
+            }}
+          />
         )}
 
         {view === "nastavnici" && <Nastavnici isAdmin={isAdmin} />}

@@ -92,6 +92,12 @@ public class PokrivenostNastaveController {
         return ResponseEntity.ok().build();
     }
     
+    @DeleteMapping("/godina/{skolskaGodinaID}")
+    public ResponseEntity<Void> deleteByGodina(@PathVariable Long skolskaGodinaID) {
+        pokrivenostNastaveService.deleteByGodina(skolskaGodinaID);
+        return ResponseEntity.noContent().build();
+    }
+    
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<String> handleException(Exception e){
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);

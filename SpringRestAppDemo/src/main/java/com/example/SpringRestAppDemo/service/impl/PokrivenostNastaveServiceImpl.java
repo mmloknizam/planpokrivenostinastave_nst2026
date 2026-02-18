@@ -360,5 +360,11 @@ public class PokrivenostNastaveServiceImpl implements PokrivenostNastaveService{
         }
 
     }
- 
+    
+    @Override
+    @Transactional
+    public void deleteByGodina(Long skolskaGodinaID) {
+        pokrivenostNastaveRepository.deleteBySkolskaGodina_SkolskaGodinaID(skolskaGodinaID);
+    }
+
 }

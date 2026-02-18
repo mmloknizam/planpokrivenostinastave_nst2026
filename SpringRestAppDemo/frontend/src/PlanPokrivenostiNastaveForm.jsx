@@ -7,7 +7,8 @@ const PlanPokrivenostiNastaveForm = ({
   onGodinaChange,
   obrisiRed,
   isAdmin,
-  onDetalji
+  onDetalji,
+  onObrisiPlan
 }) => {
   return (
     <div>
@@ -21,14 +22,28 @@ const PlanPokrivenostiNastaveForm = ({
       >
         <option value="">-- Izaberi godinu --</option>
         {skolskeGodine.map((g) => (
-          <option
-            key={g.skolskaGodinaID}
-            value={g.skolskaGodinaID}
-          >
+          <option key={g.skolskaGodinaID} value={g.skolskaGodinaID}>
             {g.godina}
           </option>
         ))}
       </select>
+
+      {isAdmin && selectedGodinaID && (
+        <button
+          className="table-btn"
+          onClick={() => {
+            if (
+              window.confirm(
+                "Da li ste sigurni da želite da obrišete ceo plan za ovu godinu?"
+              )
+            ) {
+              onObrisiPlan(selectedGodinaID);
+            }
+          }}
+        >
+          Obriši plan
+        </button>
+      )}
 
       <br />
       <br />
@@ -90,7 +105,7 @@ const PlanPokrivenostiNastaveForm = ({
               >
                 {selectedGodinaID
                   ? "Nema podataka za izabranu godinu"
-                  : " "}
+                  : "Izaberite školsku godinu"}
               </td>
             </tr>
           )}

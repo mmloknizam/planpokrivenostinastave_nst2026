@@ -24,4 +24,5 @@ public interface PokrivenostNastaveService {
     PokrivenostNastaveDto saveDetalji(PokrivenostNastaveDto dto);
     PokrivenostNastaveDto updateDetalji(Long id,PokrivenostNastaveDto dto);
     public void kreirajPlan(KreirajPlanDto dto);
+    void deleteByGodina(Long skolskaGodinaID);
 }
