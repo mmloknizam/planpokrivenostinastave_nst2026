@@ -208,6 +208,19 @@ public class PokrivenostNastaveServiceImpl implements PokrivenostNastaveService{
                     + ". Maksimum je " + maxSati + "h."
             );
         }
+        
+          PokrivenostNastave duplikat =
+        pokrivenostNastaveRepository
+                .findByPredmet_PredmetIDAndSkolskaGodina_SkolskaGodinaIDAndOblikNastave_OblikNastaveIDAndNastavnik_NastavnikID(
+                        dto.getPredmet().getPredmetID(),
+                        dto.getSkolskaGodina().getSkolskaGodinaID(),
+                        dto.getOblikNastave().getOblikNastaveID(),
+                        dto.getNastavnik().getNastavnikID()
+                );
+          
+        if (duplikat != null) {
+            throw new RuntimeException("Ovaj nastavnik je već dodat za izabrani oblik nastave!");
+        }
  
         return pokrivenostNastaveDtoEntityMapper.toDto(
                 pokrivenostNastaveRepository.save(
@@ -280,6 +293,19 @@ public class PokrivenostNastaveServiceImpl implements PokrivenostNastaveService{
                     + dto.getOblikNastave().getTip()
                     + ". Maksimum je " + maxSati + "h."
             );
+        }
+        
+        PokrivenostNastave duplikat =
+        pokrivenostNastaveRepository
+                .findByPredmet_PredmetIDAndSkolskaGodina_SkolskaGodinaIDAndOblikNastave_OblikNastaveIDAndNastavnik_NastavnikID(
+                        dto.getPredmet().getPredmetID(),
+                        dto.getSkolskaGodina().getSkolskaGodinaID(),
+                        dto.getOblikNastave().getOblikNastaveID(),
+                        dto.getNastavnik().getNastavnikID()
+                );
+          
+        if (duplikat != null) {
+            throw new RuntimeException("Ovaj nastavnik je već dodat za izabrani oblik nastave!");
         }
  
         postojeci.setNastavnik(dto.getNastavnik());

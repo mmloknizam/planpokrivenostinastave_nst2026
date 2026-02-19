@@ -48,4 +48,10 @@ public interface PokrivenostNastaveRepository extends JpaRepository<PokrivenostN
     @Modifying
     void deleteBySkolskaGodina_SkolskaGodinaID(Long skolskaGodinaID);
 
+    PokrivenostNastave findByPredmet_PredmetIDAndSkolskaGodina_SkolskaGodinaIDAndOblikNastave_OblikNastaveIDAndNastavnik_NastavnikID(
+        Long predmetID,
+        Long godinaID,
+        Long oblikID,
+        Long nastavnikID
+    );
 }

@@ -75,19 +75,20 @@ const DetaljiPokrivenostiModal = ({ detalji, setDetalji, onClose, onSave }) => {
     ));
   };
 
-  const sacuvaj = async row => {
-    try {
-      if (row.pokrivenostNastaveID) {
-        await axios.put(`/api/pokrivenostnastave/detalji/${row.pokrivenostNastaveID}`, row);
-      } else {
-        await axios.post("/api/pokrivenostnastave/detalji", row);
+    const sacuvaj = async row => {
+      try {
+        if (row.pokrivenostNastaveID) {
+          await axios.put(`/api/pokrivenostnastave/detalji/${row.pokrivenostNastaveID}`, row);
+        } else {
+          await axios.post("/api/pokrivenostnastave/detalji", row);
+        }
+        onSave?.();
+        alert("Izmene su uspešno sačuvane!");
+      } catch (e) {
+        alert("Niste napravili nijednu izmenu ili ovaj nastavnik već postoji za izabrani tip nastave!");
+        console.error("Detalji greške:", e.response?.data || e.message);
       }
-      onSave?.();
-      alert("Izmene sačuvane!");
-    } catch (e) {
-      alert("Greška pri čuvanju: " + (e.response?.data?.message || e.message));
-    }
-  };
+    };
 
   const obrisiJednog = async id => {
     if (!window.confirm("Obrisati?")) return;
@@ -127,7 +128,7 @@ const DetaljiPokrivenostiModal = ({ detalji, setDetalji, onClose, onSave }) => {
             </tr>
           </thead>
           <tbody>
-            {detalji.map(d => (
+            {sortirajDetalje (detalji).map(d => (
               <tr key={d.pokrivenostNastaveID}>
                 <td>
                   <select
