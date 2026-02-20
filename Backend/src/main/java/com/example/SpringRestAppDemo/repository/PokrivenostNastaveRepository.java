@@ -54,4 +54,12 @@ public interface PokrivenostNastaveRepository extends JpaRepository<PokrivenostN
         Long oblikID,
         Long nastavnikID
     );
+    
+    PokrivenostNastave findByPredmet_PredmetIDAndSkolskaGodina_SkolskaGodinaIDAndOblikNastave_OblikNastaveIDAndNastavnik_NastavnikIDAndPokrivenostNastaveIDNot(
+        Long predmetID,
+        Long godinaID,
+        Long oblikID,
+        Long nastavnikID,
+        Long id
+    );
 }

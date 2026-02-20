@@ -263,30 +263,30 @@ public class PokrivenostNastaveServiceImpl implements PokrivenostNastaveService{
     }
     @Override
     public PokrivenostNastaveDto updateDetalji(Long id, PokrivenostNastaveDto dto) {
+
         PokrivenostNastave postojeci = pokrivenostNastaveRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pokrivenost nastave nije pronađena"));
- 
+
         if (dto.getOblikNastave() == null || dto.getOblikNastave().getTip() == null) {
             throw new RuntimeException("Oblik nastave mora biti zadat");
         }
- 
+
         int maxSati = switch (dto.getOblikNastave().getTip()) {
-            case "Predavanja", "Vezbe" ->
-                60;
-            case "Laboratorijske vezbe" ->
-                30;
-            default ->
-                throw new RuntimeException("Nepoznat oblik nastave");
+            case "Predavanja", "Vezbe" -> 60;
+            case "Laboratorijske vezbe" -> 30;
+            default -> throw new RuntimeException("Nepoznat oblik nastave");
         };
- 
-        int trenutno = pokrivenostNastaveRepository.sumSati(
+
+        Integer trenutnoObj = pokrivenostNastaveRepository.sumSati(
                 dto.getPredmet().getPredmetID(),
                 dto.getSkolskaGodina().getSkolskaGodinaID(),
                 dto.getOblikNastave().getOblikNastaveID()
         );
- 
+
+        int trenutno = trenutnoObj != null ? trenutnoObj : 0;
+
         int stariSati = postojeci.getBrojSatiNastave();
- 
+
         if (trenutno - stariSati + dto.getBrojSatiNastave() > maxSati) {
             throw new RuntimeException(
                     "Prekoračen maksimalan broj sati za "
@@ -294,23 +294,28 @@ public class PokrivenostNastaveServiceImpl implements PokrivenostNastaveService{
                     + ". Maksimum je " + maxSati + "h."
             );
         }
-        
-        PokrivenostNastave duplikat =
-        pokrivenostNastaveRepository
-                .findByPredmet_PredmetIDAndSkolskaGodina_SkolskaGodinaIDAndOblikNastave_OblikNastaveIDAndNastavnik_NastavnikID(
-                        dto.getPredmet().getPredmetID(),
-                        dto.getSkolskaGodina().getSkolskaGodinaID(),
-                        dto.getOblikNastave().getOblikNastaveID(),
-                        dto.getNastavnik().getNastavnikID()
-                );
-          
-        if (duplikat != null) {
-            throw new RuntimeException("Ovaj nastavnik je već dodat za izabrani oblik nastave!");
+
+        if (!postojeci.getNastavnik().getNastavnikID()
+                .equals(dto.getNastavnik().getNastavnikID())) {
+
+            PokrivenostNastave duplikat =
+                    pokrivenostNastaveRepository
+                            .findByPredmet_PredmetIDAndSkolskaGodina_SkolskaGodinaIDAndOblikNastave_OblikNastaveIDAndNastavnik_NastavnikIDAndPokrivenostNastaveIDNot(
+                                    dto.getPredmet().getPredmetID(),
+                                    dto.getSkolskaGodina().getSkolskaGodinaID(),
+                                    dto.getOblikNastave().getOblikNastaveID(),
+                                    dto.getNastavnik().getNastavnikID(),
+                                    id
+                            );
+
+            if (duplikat != null) {
+                throw new RuntimeException("Ovaj nastavnik je već dodat za izabrani oblik nastave!");
+            }
         }
- 
+
         postojeci.setNastavnik(dto.getNastavnik());
         postojeci.setBrojSatiNastave(dto.getBrojSatiNastave());
- 
+
         return pokrivenostNastaveDtoEntityMapper.toDto(
                 pokrivenostNastaveRepository.save(postojeci)
         );

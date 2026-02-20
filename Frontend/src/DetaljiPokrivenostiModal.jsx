@@ -75,18 +75,41 @@ const DetaljiPokrivenostiModal = ({ detalji, setDetalji, onClose, onSave }) => {
     ));
   };
 
-    const sacuvaj = async row => {
+    const sacuvaj = async (row) => {
       try {
+        const payload = {
+          ...row,
+          brojSatiNastave: Number(row.brojSatiNastave),
+        };
+
         if (row.pokrivenostNastaveID) {
-          await axios.put(`/api/pokrivenostnastave/detalji/${row.pokrivenostNastaveID}`, row);
+          await axios.put(
+            `/api/pokrivenostnastave/detalji/${row.pokrivenostNastaveID}`,
+            payload
+          );
         } else {
-          await axios.post("/api/pokrivenostnastave/detalji", row);
+          await axios.post("/api/pokrivenostnastave/detalji", payload);
         }
-        onSave?.();
+
+        if (onSave) onSave();
+
         alert("Izmene su uspešno sačuvane!");
       } catch (e) {
-        alert("Niste napravili nijednu izmenu ili ovaj nastavnik već postoji za izabrani tip nastave!");
-        console.error("Detalji greške:", e.response?.data || e.message);
+        console.error("Detalji greške:", e);
+
+        let msg = "Greška pri čuvanju!";
+
+        if (e.response) {
+          if (typeof e.response.data === "string") {
+            msg = e.response.data;
+          } else if (e.response.data?.message) {
+            msg = e.response.data.message;
+          }
+        } else if (e.message) {
+          msg = e.message;
+        }
+
+        alert(msg);
       }
     };
 
